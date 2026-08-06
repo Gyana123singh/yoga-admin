@@ -53,6 +53,7 @@ export const NAVIGATION_SECTIONS = [
       { id: 'users', label: 'Users Directory', icon: Users, path: '/users', badge: '12.4k' },
       { id: 'subscriptions', label: 'Subscriptions & MRR', icon: CreditCard, path: '/subscriptions' },
       { id: 'recommendations', label: 'Today\'s AI Engine', icon: Sparkles, path: '/recommendations', badge: 'v2.4' },
+      { id: 'daily-needs', label: 'What Do I Need Config', icon: Target, path: '/daily-needs', badge: 'New', badgeColor: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' },
     ]
   },
   {

@@ -309,8 +309,282 @@ export const api = {
     return settingsData;
   },
 
+  // Daily Needs API (Feelings, Focus Areas, Durations, Session Templates)
+  async getDailyNeedsConfig() {
+    const data = await request('/daily-needs/config');
+    if (data && data.success) return data.data;
+    return { feelings: [], focusAreas: [], durations: [], sessions: [] };
+  },
+
+  async createFeeling(feelingData) {
+    const data = await request('/daily-needs/feelings', { method: 'POST', body: JSON.stringify(feelingData) });
+    if (data && data.success) return data.data;
+    return { _id: Date.now().toString(), ...feelingData };
+  },
+
+  async updateFeeling(id, feelingData) {
+    const data = await request(`/daily-needs/feelings/${id}`, { method: 'PUT', body: JSON.stringify(feelingData) });
+    if (data && data.success) return data.data;
+    return { _id: id, ...feelingData };
+  },
+
+  async deleteFeeling(id) {
+    return await request(`/daily-needs/feelings/${id}`, { method: 'DELETE' });
+  },
+
+  async createFocusArea(focusData) {
+    const data = await request('/daily-needs/focus-areas', { method: 'POST', body: JSON.stringify(focusData) });
+    if (data && data.success) return data.data;
+    return { _id: Date.now().toString(), ...focusData };
+  },
+
+  async updateFocusArea(id, focusData) {
+    const data = await request(`/daily-needs/focus-areas/${id}`, { method: 'PUT', body: JSON.stringify(focusData) });
+    if (data && data.success) return data.data;
+    return { _id: id, ...focusData };
+  },
+
+  async deleteFocusArea(id) {
+    return await request(`/daily-needs/focus-areas/${id}`, { method: 'DELETE' });
+  },
+
+  async createDuration(durationData) {
+    const data = await request('/daily-needs/durations', { method: 'POST', body: JSON.stringify(durationData) });
+    if (data && data.success) return data.data;
+    return { _id: Date.now().toString(), ...durationData };
+  },
+
+  async updateDuration(id, durationData) {
+    const data = await request(`/daily-needs/durations/${id}`, { method: 'PUT', body: JSON.stringify(durationData) });
+    if (data && data.success) return data.data;
+    return { _id: id, ...durationData };
+  },
+
+  async deleteDuration(id) {
+    return await request(`/daily-needs/durations/${id}`, { method: 'DELETE' });
+  },
+
+  async createSessionConfig(sessionData) {
+    const data = await request('/daily-needs/sessions', { method: 'POST', body: JSON.stringify(sessionData) });
+    if (data && data.success) return data.data;
+    return { _id: Date.now().toString(), ...sessionData };
+  },
+
+  async updateSessionConfig(id, sessionData) {
+    const data = await request(`/daily-needs/sessions/${id}`, { method: 'PUT', body: JSON.stringify(sessionData) });
+    if (data && data.success) return data.data;
+    return { _id: id, ...sessionData };
+  },
+
+  async deleteSessionConfig(id) {
+    return await request(`/daily-needs/sessions/${id}`, { method: 'DELETE' });
+  },
+
+  async resolvePersonalSession(payload) {
+    const data = await request('/daily-needs/resolve-session', { method: 'POST', body: JSON.stringify(payload) });
+    if (data && data.success) return data.data;
+    return null;
+  },
+
+  // Video API with smart auto-failover
+  async getVideos(feeling = '') {
+    const query = feeling ? `?feeling=${feeling}` : '';
+    const data = await request(`/videos${query}`);
+    if (data && data.success) return data.data;
+    return [];
+  },
+
+  async uploadVideo(formData) {
+    const primaryUrl = API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL;
+    const secondaryUrl = LIVE_API_URL.endsWith('/') ? LIVE_API_URL.slice(0, -1) : LIVE_API_URL;
+
+    for (const baseUrl of [primaryUrl, secondaryUrl]) {
+      try {
+        const res = await fetch(`${baseUrl}/videos/upload`, {
+          method: 'POST',
+          body: formData
+        });
+        if (res.ok) {
+          return await res.json();
+        }
+      } catch (err) {
+        console.warn(`[Video Upload Failover] ${baseUrl} failed, trying secondary...`);
+      }
+    }
+    return null;
+  },
+
+  async deleteVideo(id) {
+    return await request(`/videos/${id}`, { method: 'DELETE' });
+  },
+
+  // Quick Practice & SOS Breathing API
+  async getQuickPractices(category = '') {
+    const q = category ? `?category=${category}` : '';
+    const data = await request(`/quick-practices${q}`);
+    if (data && data.success) return data.data;
+    return { all: [], quickTimers: [], sosMoments: [] };
+  },
+
+  async getQuickPracticeById(id) {
+    const data = await request(`/quick-practices/${id}`);
+    if (data && data.success) return data.data;
+    return null;
+  },
+
+  async createQuickPractice(payload) {
+    if (payload instanceof FormData) {
+      const primaryUrl = API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL;
+      const secondaryUrl = LIVE_API_URL.endsWith('/') ? LIVE_API_URL.slice(0, -1) : LIVE_API_URL;
+      for (const baseUrl of [primaryUrl, secondaryUrl]) {
+        try {
+          const res = await fetch(`${baseUrl}/quick-practices`, { method: 'POST', body: payload });
+          if (res.ok) {
+            const data = await res.json();
+            return data.data;
+          }
+        } catch (e) {}
+      }
+      return null;
+    }
+    const data = await request('/quick-practices', { method: 'POST', body: JSON.stringify(payload) });
+    if (data && data.success) return data.data;
+    return null;
+  },
+
+  async updateQuickPractice(id, payload) {
+    if (payload instanceof FormData) {
+      const primaryUrl = API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL;
+      const secondaryUrl = LIVE_API_URL.endsWith('/') ? LIVE_API_URL.slice(0, -1) : LIVE_API_URL;
+      for (const baseUrl of [primaryUrl, secondaryUrl]) {
+        try {
+          const res = await fetch(`${baseUrl}/quick-practices/${id}`, { method: 'PUT', body: payload });
+          if (res.ok) {
+            const data = await res.json();
+            return data.data;
+          }
+        } catch (e) {}
+      }
+      return null;
+    }
+    const data = await request(`/quick-practices/${id}`, { method: 'PUT', body: JSON.stringify(payload) });
+    if (data && data.success) return data.data;
+    return null;
+  },
+
+  async deleteQuickPractice(id) {
+    return await request(`/quick-practices/${id}`, { method: 'DELETE' });
+  },
+
+  // Goal-Based Yoga Programs API
+  async getYogaPrograms(goalCategory = '') {
+    const q = goalCategory && goalCategory !== 'All Goals' ? `?goalCategory=${goalCategory}` : '';
+    const data = await request(`/yoga-programs${q}`);
+    if (data && data.success) return data.data;
+    return [];
+  },
+
+  async getYogaProgramById(id) {
+    const data = await request(`/yoga-programs/${id}`);
+    if (data && data.success) return data.data;
+    return null;
+  },
+
+  async createYogaProgram(payload) {
+    if (payload instanceof FormData) {
+      const primaryUrl = API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL;
+      const secondaryUrl = LIVE_API_URL.endsWith('/') ? LIVE_API_URL.slice(0, -1) : LIVE_API_URL;
+      for (const baseUrl of [primaryUrl, secondaryUrl]) {
+        try {
+          const res = await fetch(`${baseUrl}/yoga-programs`, { method: 'POST', body: payload });
+          if (res.ok) {
+            const data = await res.json();
+            return data.data;
+          }
+        } catch (e) {}
+      }
+      return null;
+    }
+    const data = await request('/yoga-programs', { method: 'POST', body: JSON.stringify(payload) });
+    if (data && data.success) return data.data;
+    return null;
+  },
+
+  async updateYogaProgram(id, payload) {
+    if (payload instanceof FormData) {
+      const primaryUrl = API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL;
+      const secondaryUrl = LIVE_API_URL.endsWith('/') ? LIVE_API_URL.slice(0, -1) : LIVE_API_URL;
+      for (const baseUrl of [primaryUrl, secondaryUrl]) {
+        try {
+          const res = await fetch(`${baseUrl}/yoga-programs/${id}`, { method: 'PUT', body: payload });
+          if (res.ok) {
+            const data = await res.json();
+            return data.data;
+          }
+        } catch (e) {}
+      }
+      return null;
+    }
+    const data = await request(`/yoga-programs/${id}`, { method: 'PUT', body: JSON.stringify(payload) });
+    if (data && data.success) return data.data;
+    return null;
+  },
+
+  async deleteYogaProgram(id) {
+    return await request(`/yoga-programs/${id}`, { method: 'DELETE' });
+  },
+
+  async logProgramDayCompletion(programId, dayNumber) {
+    const data = await request(`/yoga-programs/${programId}/log-day`, {
+      method: 'POST',
+      body: JSON.stringify({ dayNumber })
+    });
+    if (data && data.success) return data.data;
+    return null;
+  },
+
   // Database Seed API
   async seedDatabase() {
     return await request('/seed', { method: 'POST' });
   }
 };
+
+// Smart Socket Auto-Failover Helper (Tries local ws://localhost:5000 first, failovers to live wss://apiyoga.hirehand.co.in)
+export function createSmartSocket(feeling, onUpdate) {
+  const WS_LOCAL = 'ws://localhost:5000/socket.io/?EIO=4&transport=websocket';
+  const WS_LIVE = 'wss://apiyoga.hirehand.co.in/socket.io/?EIO=4&transport=websocket';
+
+  let ws = null;
+  try {
+    ws = new WebSocket(WS_LOCAL);
+
+    ws.onopen = () => {
+      console.log('⚡ [Client Socket] Connected to Local WebSocket server');
+    };
+
+    ws.onmessage = (event) => {
+      if (onUpdate) onUpdate(event.data);
+    };
+
+    ws.onerror = () => {
+      console.warn('[Socket Auto-Failover] Local WS unavailable. Connecting to live server...');
+      try {
+        ws = new WebSocket(WS_LIVE);
+        ws.onopen = () => console.log('⚡ [Client Socket] Connected to Live WebSocket server');
+        ws.onmessage = (event) => { if (onUpdate) onUpdate(event.data); };
+      } catch (e) {
+        console.warn('Live WS fallback error:', e);
+      }
+    };
+  } catch (err) {
+    console.warn('WebSocket init fallback:', err);
+  }
+
+  return {
+    disconnect: () => {
+      if (ws) ws.close();
+    }
+  };
+}
+
+

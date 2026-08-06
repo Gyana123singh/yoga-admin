@@ -14,6 +14,16 @@ import { BreathingLibraryPage } from './pages/BreathingLibraryPage';
 import { AIPracticeGeneratorPage } from './pages/AIPracticeGeneratorPage';
 import { PracticeBuilderPage } from './pages/PracticeBuilderPage';
 import { HealthIntegrationPage } from './pages/HealthIntegrationPage';
+import { DailyNeedManagerPage } from './pages/DailyNeedManagerPage';
+import { ActivePracticePlayerPage } from './pages/ActivePracticePlayerPage';
+import { QuickPracticeTimerPage } from './pages/QuickPracticeTimerPage';
+import { QuickPracticeManagerPage } from './pages/QuickPracticeManagerPage';
+import { BreathingPatternLibraryPage } from './pages/BreathingPatternLibraryPage';
+import { YogaProgramsPage } from './pages/YogaProgramsPage';
+import { ProgramDetailPage } from './pages/ProgramDetailPage';
+import { DailySessionOverviewPage } from './pages/DailySessionOverviewPage';
+import { ProgramPlayerPage } from './pages/ProgramPlayerPage';
+import { ProgramManagerPage } from './pages/ProgramManagerPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { PlaceholderPage } from './pages/PlaceholderPage';
 
@@ -75,13 +85,22 @@ function AppContent() {
           <Route path="/ai-generator" element={<AIPracticeGeneratorPage />} />
           <Route path="/practice-builder" element={<PracticeBuilderPage />} />
           <Route path="/health-integration" element={<HealthIntegrationPage />} />
+          <Route path="/daily-needs" element={<DailyNeedManagerPage />} />
+          <Route path="/quick-practice" element={<QuickPracticeManagerPage />} />
+          <Route path="/onboarding" element={<DailyNeedManagerPage />} />
+          <Route path="/practice-player" element={<ActivePracticePlayerPage />} />
+          <Route path="/quick-practice-timer" element={<QuickPracticeTimerPage />} />
+          <Route path="/breathing-library" element={<BreathingPatternLibraryPage />} />
+          <Route path="/breathing" element={<BreathingPatternLibraryPage />} />
           <Route path="/settings" element={<SettingsPage />} />
 
-          {/* Dynamic Fully Functioning Modules */}
-          <Route path="/yoga-programs" element={<PlaceholderPage title="Yoga Programs" description="Manage structured multi-week yoga series and difficulty tracks." icon={Flower2} category="Yoga Programs" />} />
+          <Route path="/yoga-programs" element={<ProgramManagerPage />} />
+          <Route path="/yoga-programs-customer" element={<YogaProgramsPage />} />
+          <Route path="/yoga-programs/:id" element={<ProgramDetailPage />} />
+          <Route path="/yoga-programs/:programId/day/:dayNumber" element={<DailySessionOverviewPage />} />
+          <Route path="/yoga-programs/:programId/day/:dayNumber/player" element={<ProgramPlayerPage />} />
           <Route path="/meditation" element={<PlaceholderPage title="Meditation Library" description="Guided mindfulness audio sessions and ambient soundscapes." icon={Brain} category="Mindfulness" />} />
           <Route path="/sleep" element={<PlaceholderPage title="Sleep Programs" description="Yoga Nidra routines, insomnia triggers, and bedtime audio." icon={Moon} category="Sleep" />} />
-          <Route path="/quick-practice" element={<PlaceholderPage title="Quick Practice Engine" description="2-minute to 15-minute express wellness routines." icon={Zap} category="Express Flows" />} />
           <Route path="/ai-coach" element={<PlaceholderPage title="AI Coach & Assistant" description="Personalized AI feedback rules and user chat transcripts." icon={Bot} category="AI Assistant" />} />
           <Route path="/flow-builder" element={<PlaceholderPage title="Flow Timeline Builder" description="Visual animation, transition timing, and pose duration editor." icon={Sliders} category="Studio Studio" />} />
           <Route path="/travel-mode" element={<PlaceholderPage title="Travel Mode" description="Hotel room & airport gate no-equipment practices." icon={Plane} category="Special Modes" />} />
