@@ -5,7 +5,7 @@ import { Button } from '../components/common/Button';
 import { useApp } from '../context/AppContext';
 import { api } from '../services/api';
 import {
-  Wind,
+  Dumbbell,
   Plus,
   Trash2,
   Edit2,
@@ -16,15 +16,14 @@ import {
   Image as ImageIcon,
   CheckCircle2,
   Flower2,
-  Info,
   BookOpen,
   Sparkles
 } from 'lucide-react';
 
-export function BreathingPatternLibraryPage() {
+export function ExerciseLibraryPage() {
   const { showToast } = useApp();
 
-  const [techniques, setTechniques] = useState([]);
+  const [exercises, setExercises] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const [modalState, setModalState] = useState({
@@ -32,24 +31,20 @@ export function BreathingPatternLibraryPage() {
     isEdit: false,
     id: null,
     title: '',
-    subtitle: 'Purifying Breath • Energizing Mind',
-    badgeTag: 'CLEANSE',
-    category: 'Breathing',
-    totalRounds: 3,
-    durationMinutes: 5,
-    inhaleSeconds: 4,
-    holdSeconds: 4,
-    exhaleSeconds: 4,
+    subtitle: 'Restorative Decompression • Spine Extension',
+    badgeTag: 'REST',
+    category: 'Exercises',
+    durationMinutes: 10,
 
-    // Accordion fields matching Screenshots 2 & 3
-    whatIs: 'Kapalbhati is a powerful yogic breathing technique that involves rapid, forceful exhalations and passive inhalations.',
-    benefits: 'Improves digestion, boosts energy, detoxifies body, enhances lung capacity, and sharpens mental focus.',
-    correctPosture: 'Sit in a comfortable meditative posture such as Sukhasana or Padmasana with spine erect and shoulders relaxed.',
-    instructions: 'General instructions and important guidelines you should know before starting your practice.',
-    howToDo: 'Step-by-step method to practice Kapalbhati correctly for maximum benefit. Take a deep inhale and exhale forcefully pulling navel inward.',
-    whatItDoesntGuarantee: 'Kapalbhati is effective for many conditions but it is not a cure for all chronic ailments without medical guidance.',
-    contraindications: 'Certain health conditions where Kapalbhati should be avoided: pregnancy, high blood pressure, heart diseases, hernia, and recent abdominal surgery.',
-    originHistory: 'Kapalbhati originated from ancient yogic texts in India (Hatha Yoga Pradipika). The word comes from Kapal (skull) and Bhati (shining).',
+    // Accordion fields
+    whatIs: 'Balasana (Child Pose) is a gentle, restorative yoga posture that lengthens the spine.',
+    benefits: 'Gently stretches hips, thighs, and ankles. Relieves back and neck strain while promoting relaxation.',
+    correctPosture: 'Kneel on the mat, bring big toes together, sit on heels, and fold torso forward extending arms out long.',
+    instructions: 'General instructions and alignment guidelines before beginning your movement flow.',
+    howToDo: 'Rest forehead on mat, extend arms forward, and breathe deeply into lower back.',
+    whatItDoesntGuarantee: 'Provides immediate tension relief but is not a substitute for professional orthopedic care.',
+    contraindications: 'Avoid if suffering from severe knee joint injury or ankle sprain.',
+    originHistory: 'Originated from traditional Hatha Yoga.',
 
     // Media upload files and URLs
     heroImageFile: null,
@@ -65,13 +60,13 @@ export function BreathingPatternLibraryPage() {
   });
 
   useEffect(() => {
-    loadTechniques();
+    loadExercises();
   }, []);
 
-  const loadTechniques = async () => {
+  const loadExercises = async () => {
     setIsLoading(true);
-    const data = await api.getBreathingTechniques();
-    if (data) setTechniques(data);
+    const data = await api.getExercises();
+    if (data) setExercises(data);
     setIsLoading(false);
   };
 
@@ -81,23 +76,19 @@ export function BreathingPatternLibraryPage() {
       isEdit: false,
       id: null,
       title: '',
-      subtitle: 'Purifying Breath • Energizing Mind',
-      badgeTag: 'CLEANSE',
-      category: 'Breathing',
-      totalRounds: 3,
-      durationMinutes: 5,
-      inhaleSeconds: 4,
-      holdSeconds: 4,
-      exhaleSeconds: 4,
+      subtitle: 'Restorative Decompression • Spine Extension',
+      badgeTag: 'REST',
+      category: 'Exercises',
+      durationMinutes: 10,
 
-      whatIs: 'Kapalbhati is a powerful yogic breathing technique that involves rapid, forceful exhalations and passive inhalations.',
-      benefits: 'Improves digestion, boosts energy, detoxifies body, enhances lung capacity, and sharpens mental focus.',
-      correctPosture: 'Sit in a comfortable meditative posture such as Sukhasana or Padmasana with spine erect and shoulders relaxed.',
-      instructions: 'General instructions and important guidelines you should know before starting your practice.',
-      howToDo: 'Step-by-step method to practice Kapalbhati correctly for maximum benefit.',
-      whatItDoesntGuarantee: 'Effective for many conditions but not a cure for all chronic ailments.',
-      contraindications: 'Avoid if pregnant, high blood pressure, heart disease, hernia.',
-      originHistory: 'Originated from ancient yogic texts in India (Hatha Yoga Pradipika).',
+      whatIs: 'Balasana (Child Pose) is a gentle, restorative yoga posture that lengthens the spine.',
+      benefits: 'Gently stretches hips, thighs, and ankles. Relieves lower back strain.',
+      correctPosture: 'Kneel on the mat, bring big toes together, sit on heels, and fold torso forward.',
+      instructions: 'General instructions and alignment guidelines before starting.',
+      howToDo: 'Rest forehead on mat, extend arms forward, and breathe deeply into lower back.',
+      whatItDoesntGuarantee: 'Provides immediate tension relief but is not a permanent substitute for orthopedic care.',
+      contraindications: 'Avoid if suffering from severe knee or ankle injury.',
+      originHistory: 'Originated from traditional Hatha Yoga.',
 
       heroImageFile: null,
       heroImageUrlCustom: '',
@@ -118,14 +109,10 @@ export function BreathingPatternLibraryPage() {
       isEdit: true,
       id: item._id || item.id,
       title: item.title || '',
-      subtitle: item.subtitle || 'Purifying Breath • Energizing Mind',
-      badgeTag: item.badgeTag || 'CLEANSE',
-      category: item.category || 'Breathing',
-      totalRounds: item.totalRounds || 3,
-      durationMinutes: item.durationMinutes || 5,
-      inhaleSeconds: item.inhaleSeconds || 4,
-      holdSeconds: item.holdSeconds || 4,
-      exhaleSeconds: item.exhaleSeconds || 4,
+      subtitle: item.subtitle || 'Restorative Decompression • Spine Extension',
+      badgeTag: item.badgeTag || 'REST',
+      category: item.category || 'Exercises',
+      durationMinutes: item.durationMinutes || 10,
 
       whatIs: item.whatIs || '',
       benefits: item.benefits || '',
@@ -156,11 +143,7 @@ export function BreathingPatternLibraryPage() {
     formData.append('subtitle', modalState.subtitle);
     formData.append('badgeTag', modalState.badgeTag);
     formData.append('category', modalState.category);
-    formData.append('totalRounds', modalState.totalRounds);
     formData.append('durationMinutes', modalState.durationMinutes);
-    formData.append('inhaleSeconds', modalState.inhaleSeconds);
-    formData.append('holdSeconds', modalState.holdSeconds);
-    formData.append('exhaleSeconds', modalState.exhaleSeconds);
 
     // Accordion fields
     formData.append('whatIs', modalState.whatIs);
@@ -190,17 +173,17 @@ export function BreathingPatternLibraryPage() {
 
     try {
       if (modalState.isEdit) {
-        const updated = await api.updateBreathingTechnique(modalState.id, formData);
+        const updated = await api.updateExercise(modalState.id, formData);
         if (updated) {
-          showToast(`Technique "${modalState.title}" updated!`, 'success');
-          loadTechniques();
+          showToast(`Exercise "${modalState.title}" updated!`, 'success');
+          loadExercises();
           setModalState({ ...modalState, open: false });
         }
       } else {
-        const created = await api.createBreathingTechnique(formData);
+        const created = await api.createExercise(formData);
         if (created) {
-          showToast(`Technique "${modalState.title}" created!`, 'success');
-          loadTechniques();
+          showToast(`Exercise "${modalState.title}" created!`, 'success');
+          loadExercises();
           setModalState({ ...modalState, open: false });
         }
       }
@@ -210,9 +193,9 @@ export function BreathingPatternLibraryPage() {
   };
 
   const handleDelete = async (id, title) => {
-    await api.deleteBreathingTechnique(id);
-    setTechniques((prev) => prev.filter((t) => t._id !== id && t.id !== id));
-    showToast(`Technique "${title}" deleted from library`, 'info');
+    await api.deleteExercise(id);
+    setExercises((prev) => prev.filter((e) => e._id !== id && e.id !== id));
+    showToast(`Exercise "${title}" deleted from library`, 'info');
   };
 
   return (
@@ -221,58 +204,58 @@ export function BreathingPatternLibraryPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-xs font-bold text-emerald-500 mb-2">
-            <Wind className="w-3.5 h-3.5" />
+            <Dumbbell className="w-3.5 h-3.5" />
             <span>Explore Library Suite</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-            Pranayama & Breathing Library Management
+            Exercises Library Management
           </h1>
           <p className="text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400 mt-1">
-            Configure Breathing Techniques (Kapalbhati, Pranayama, etc.), Upload Demo Videos, Mandala Frames, Nature Background Imagery, Ambient Audio & Accordion Instructions.
+            Configure Featured Exercises (Balasana, Padmasana, etc.), Upload Demo Videos, Mandala Frames, Nature Background Imagery, Ambient Audio & Accordion Instructions.
           </p>
         </div>
 
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" icon={RefreshCw} onClick={loadTechniques}>
+          <Button variant="outline" size="sm" icon={RefreshCw} onClick={loadExercises}>
             Sync Library
           </Button>
           <Button variant="primary" size="sm" icon={Plus} onClick={handleOpenAdd}>
-            Add Breathing Technique
+            Add Exercise
           </Button>
         </div>
       </div>
 
-      {/* Techniques Grid */}
+      {/* Exercises Grid */}
       <Card>
         <CardHeader
           actions={
             <Button variant="primary" size="sm" icon={Plus} onClick={handleOpenAdd}>
-              Add Technique
+              Add Exercise
             </Button>
           }
         >
-          <CardTitle subtitle="Rendered live on Flutter Mobile App Explore Library (Images 1-4)">
-            Configured Breathing Techniques ({techniques.length})
+          <CardTitle subtitle="Rendered live on Flutter Mobile App Explore Library -> Exercises Tab">
+            Configured Exercises ({exercises.length})
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {techniques.map((item) => (
+            {exercises.map((item) => (
               <div
                 key={item._id || item.id}
                 className="p-5 rounded-2xl bg-slate-100/90 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 space-y-4 shadow-xs group hover:border-emerald-500/40 transition-all"
               >
                 <div className="relative aspect-video rounded-xl bg-slate-900 overflow-hidden">
                   <img
-                    src={item.heroImageUrl || 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?q=80&w=1200&auto=format&fit=crop'}
+                    src={item.heroImageUrl || 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?q=80&w=1200&auto=format&fit=crop'}
                     alt={item.title}
                     className="w-full h-full object-cover opacity-85"
                   />
                   <Badge variant="emerald" className="absolute top-2 left-2 font-bold uppercase">
-                    {item.badgeTag || 'CLEANSE'}
+                    {item.badgeTag || 'REST'}
                   </Badge>
                   <span className="absolute bottom-2 right-2 px-2.5 py-1 rounded-full bg-black/70 backdrop-blur-md text-white text-xs font-mono font-bold">
-                    {item.durationMinutes || 5} Mins • {item.totalRounds || 3} Rounds
+                    {item.durationMinutes || 10} Mins
                   </span>
                 </div>
 
@@ -320,19 +303,19 @@ export function BreathingPatternLibraryPage() {
         <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 max-w-2xl w-full border border-slate-200 dark:border-slate-800 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto">
             <h3 className="text-xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
-              <Wind className="w-6 h-6 text-emerald-500" />
-              {modalState.isEdit ? 'Edit Breathing Technique' : 'Add Breathing Technique'}
+              <Dumbbell className="w-6 h-6 text-emerald-500" />
+              {modalState.isEdit ? 'Edit Exercise / Pose' : 'Add Exercise / Pose'}
             </h3>
 
             <form onSubmit={handleSave} className="space-y-4">
               {/* BASIC INFO */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Technique Title</label>
+                  <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Exercise Title</label>
                   <input
                     type="text"
                     required
-                    placeholder="e.g. Kapalbhati Pranayama"
+                    placeholder="e.g. Balasana"
                     value={modalState.title}
                     onChange={(e) => setModalState({ ...modalState, title: e.target.value })}
                     className="w-full px-4 py-2.5 text-xs font-bold rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
@@ -343,7 +326,7 @@ export function BreathingPatternLibraryPage() {
                   <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Subtitle</label>
                   <input
                     type="text"
-                    placeholder="Purifying Breath • Energizing Mind"
+                    placeholder="Restorative Decompression • Spine Extension"
                     value={modalState.subtitle}
                     onChange={(e) => setModalState({ ...modalState, subtitle: e.target.value })}
                     className="w-full px-4 py-2.5 text-xs font-bold rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
@@ -351,7 +334,7 @@ export function BreathingPatternLibraryPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Badge Tag</label>
                   <select
@@ -359,9 +342,11 @@ export function BreathingPatternLibraryPage() {
                     onChange={(e) => setModalState({ ...modalState, badgeTag: e.target.value })}
                     className="w-full px-3 py-2 text-xs font-bold rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
                   >
-                    <option value="CLEANSE">CLEANSE</option>
-                    <option value="VITALITY">VITALITY</option>
-                    <option value="DEEP RELAXATION">DEEP RELAXATION</option>
+                    <option value="REST">REST</option>
+                    <option value="MEDITATION">MEDITATION</option>
+                    <option value="FULL BODY">FULL BODY</option>
+                    <option value="STRENGTH">STRENGTH</option>
+                    <option value="FLEXIBILITY">FLEXIBILITY</option>
                   </select>
                 </div>
 
@@ -375,17 +360,6 @@ export function BreathingPatternLibraryPage() {
                     className="w-full px-3 py-2 text-xs font-bold rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
                   />
                 </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Total Rounds</label>
-                  <input
-                    type="number"
-                    min="1"
-                    value={modalState.totalRounds}
-                    onChange={(e) => setModalState({ ...modalState, totalRounds: e.target.value })}
-                    className="w-full px-3 py-2 text-xs font-bold rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
-                  />
-                </div>
               </div>
 
               {/* MEDIA ASSETS UPLOADS (Videos, Images, Mandala, Music) */}
@@ -394,7 +368,7 @@ export function BreathingPatternLibraryPage() {
                   <Upload className="w-4 h-4" /> Media & Video Assets Upload (Rendered on Customer Flutter App)
                 </h4>
 
-                {/* COVER IMAGE UPLOAD matching Image 1 */}
+                {/* COVER IMAGE UPLOAD */}
                 <div className="p-3.5 rounded-2xl bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 space-y-2">
                   <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 uppercase">
                     🖼️ Hero Cover Image (Upload Image File OR Optional URL)
@@ -414,10 +388,10 @@ export function BreathingPatternLibraryPage() {
                   />
                 </div>
 
-                {/* DEMO VIDEO UPLOAD matching Image 2 */}
+                {/* DEMO VIDEO UPLOAD */}
                 <div className="p-3.5 rounded-2xl bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 space-y-2">
                   <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 uppercase">
-                    📹 Demo Video for Technique Detail Page (Upload MP4 File OR Optional URL)
+                    📹 Demo Video for Exercise Detail Page (Upload MP4 File OR Optional URL)
                   </label>
                   <input
                     type="file"
@@ -434,7 +408,7 @@ export function BreathingPatternLibraryPage() {
                   />
                 </div>
 
-                {/* MANDALA FRAME UPLOAD matching Image 4 */}
+                {/* MANDALA FRAME UPLOAD */}
                 <div className="p-3.5 rounded-2xl bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 space-y-2">
                   <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 uppercase">
                     ⭕ Round Mandala Decorative Frame Ring (Upload PNG File OR Optional URL)
@@ -454,7 +428,7 @@ export function BreathingPatternLibraryPage() {
                   />
                 </div>
 
-                {/* BACKGROUND MUSIC UPLOAD matching Image 4 */}
+                {/* BACKGROUND MUSIC UPLOAD */}
                 <div className="p-3.5 rounded-2xl bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 space-y-2">
                   <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 uppercase">
                     🎵 Background Ambient Music Stream (Upload Audio File OR Optional URL)
@@ -475,15 +449,15 @@ export function BreathingPatternLibraryPage() {
                 </div>
               </div>
 
-              {/* ALL 8 ACCORDION INSTRUCTIONS matching Screenshots 2 & 3 */}
+              {/* ALL 8 ACCORDION INSTRUCTIONS */}
               <div className="space-y-3 pt-3">
                 <h4 className="text-xs font-extrabold text-amber-500 uppercase tracking-wider flex items-center gap-1.5">
-                  <BookOpen className="w-4 h-4" /> 8 Accordion Instructions (Images 2 & 3)
+                  <BookOpen className="w-4 h-4" /> 8 Accordion Instructions
                 </h4>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
                   <div>
-                    <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">🍃 What is (Technique Description)</label>
+                    <label className="block font-bold text-slate-700 dark:text-slate-300 mb-1">🍃 What is (Exercise Description)</label>
                     <textarea
                       rows={2}
                       value={modalState.whatIs}
@@ -569,7 +543,7 @@ export function BreathingPatternLibraryPage() {
                   Cancel
                 </Button>
                 <Button variant="primary" type="submit" icon={Upload}>
-                  Save Technique
+                  Save Exercise
                 </Button>
               </div>
             </form>

@@ -126,7 +126,7 @@ export const api = {
   async getAsanas() {
     const data = await request('/asanas');
     if (data && data.success) return data.data;
-    return MOCK_ASANAS;
+    return [];
   },
 
   async createAsana(asanaData) {
@@ -135,10 +135,7 @@ export const api = {
       body: JSON.stringify(asanaData),
     });
     if (data && data.success) return data.data;
-    return {
-      id: `ASN-${Math.floor(10 + Math.random() * 90)}`,
-      ...asanaData
-    };
+    return null;
   },
 
   async updateAsana(id, updateData) {
@@ -147,7 +144,7 @@ export const api = {
       body: JSON.stringify(updateData),
     });
     if (data && data.success) return data.data;
-    return { id, ...updateData };
+    return null;
   },
 
   async deleteAsana(id) {
@@ -158,32 +155,114 @@ export const api = {
   async getBreathingTechniques() {
     const data = await request('/breathing');
     if (data && data.success) return data.data;
-    return MOCK_BREATHING_TECHNIQUES;
+    return [];
   },
 
   async createBreathingTechnique(dataObj) {
+    if (dataObj instanceof FormData) {
+      const primaryUrl = API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL;
+      const secondaryUrl = LIVE_API_URL.endsWith('/') ? LIVE_API_URL.slice(0, -1) : LIVE_API_URL;
+      for (const baseUrl of [primaryUrl, secondaryUrl]) {
+        try {
+          const res = await fetch(`${baseUrl}/breathing`, { method: 'POST', body: dataObj });
+          if (res.ok) {
+            const data = await res.json();
+            return data.data;
+          }
+        } catch (e) {}
+      }
+      return null;
+    }
     const data = await request('/breathing', {
       method: 'POST',
       body: JSON.stringify(dataObj),
     });
     if (data && data.success) return data.data;
-    return {
-      id: `BRT-${Math.floor(10 + Math.random() * 90)}`,
-      ...dataObj
-    };
+    return null;
   },
 
   async updateBreathingTechnique(id, updateData) {
+    if (updateData instanceof FormData) {
+      const primaryUrl = API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL;
+      const secondaryUrl = LIVE_API_URL.endsWith('/') ? LIVE_API_URL.slice(0, -1) : LIVE_API_URL;
+      for (const baseUrl of [primaryUrl, secondaryUrl]) {
+        try {
+          const res = await fetch(`${baseUrl}/breathing/${id}`, { method: 'PUT', body: updateData });
+          if (res.ok) {
+            const data = await res.json();
+            return data.data;
+          }
+        } catch (e) {}
+      }
+      return null;
+    }
     const data = await request(`/breathing/${id}`, {
       method: 'PUT',
       body: JSON.stringify(updateData),
     });
     if (data && data.success) return data.data;
-    return { id, ...updateData };
+    return null;
   },
 
   async deleteBreathingTechnique(id) {
     return await request(`/breathing/${id}`, { method: 'DELETE' });
+  },
+
+  // Exercises API
+  async getExercises() {
+    const data = await request('/exercises');
+    if (data && data.success) return data.data;
+    return [];
+  },
+
+  async createExercise(dataObj) {
+    if (dataObj instanceof FormData) {
+      const primaryUrl = API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL;
+      const secondaryUrl = LIVE_API_URL.endsWith('/') ? LIVE_API_URL.slice(0, -1) : LIVE_API_URL;
+      for (const baseUrl of [primaryUrl, secondaryUrl]) {
+        try {
+          const res = await fetch(`${baseUrl}/exercises`, { method: 'POST', body: dataObj });
+          if (res.ok) {
+            const data = await res.json();
+            return data.data;
+          }
+        } catch (e) {}
+      }
+      return null;
+    }
+    const data = await request('/exercises', {
+      method: 'POST',
+      body: JSON.stringify(dataObj),
+    });
+    if (data && data.success) return data.data;
+    return null;
+  },
+
+  async updateExercise(id, updateData) {
+    if (updateData instanceof FormData) {
+      const primaryUrl = API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL;
+      const secondaryUrl = LIVE_API_URL.endsWith('/') ? LIVE_API_URL.slice(0, -1) : LIVE_API_URL;
+      for (const baseUrl of [primaryUrl, secondaryUrl]) {
+        try {
+          const res = await fetch(`${baseUrl}/exercises/${id}`, { method: 'PUT', body: updateData });
+          if (res.ok) {
+            const data = await res.json();
+            return data.data;
+          }
+        } catch (e) {}
+      }
+      return null;
+    }
+    const data = await request(`/exercises/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(updateData),
+    });
+    if (data && data.success) return data.data;
+    return null;
+  },
+
+  async deleteExercise(id) {
+    return await request(`/exercises/${id}`, { method: 'DELETE' });
   },
 
   // Recommendation Rules API
@@ -541,6 +620,50 @@ export const api = {
     });
     if (data && data.success) return data.data;
     return null;
+  },
+
+  // Daily Schedule & Calendar API
+  async getDailySchedulesByDate(dateStr = '') {
+    const q = dateStr ? `?date=${dateStr}` : '';
+    const data = await request(`/daily-schedule${q}`);
+    if (data && data.success) return data;
+    return { data: [], meta: { total: 0, completedCount: 0 } };
+  },
+
+  async addDailySchedule(payload) {
+    if (payload instanceof FormData) {
+      const primaryUrl = API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL;
+      const secondaryUrl = LIVE_API_URL.endsWith('/') ? LIVE_API_URL.slice(0, -1) : LIVE_API_URL;
+      for (const baseUrl of [primaryUrl, secondaryUrl]) {
+        try {
+          const res = await fetch(`${baseUrl}/daily-schedule`, { method: 'POST', body: payload });
+          if (res.ok) {
+            const data = await res.json();
+            return data.data;
+          }
+        } catch (e) {}
+      }
+      return null;
+    }
+    const data = await request('/daily-schedule', { method: 'POST', body: JSON.stringify(payload) });
+    if (data && data.success) return data.data;
+    return null;
+  },
+
+  async toggleDailyScheduleStatus(id) {
+    const data = await request(`/daily-schedule/${id}/toggle-complete`, { method: 'PUT' });
+    if (data && data.success) return data.data;
+    return null;
+  },
+
+  async deleteDailySchedule(id) {
+    return await request(`/daily-schedule/${id}`, { method: 'DELETE' });
+  },
+
+  async getDailyScheduleMonthStats(year = 2026, month = 7) {
+    const data = await request(`/daily-schedule/month-stats?year=${year}&month=${month}`);
+    if (data && data.success) return data.data;
+    return { completedDays: 0, partiallyCompleted: 0, missedDays: 31, activeDatesWithStatus: {} };
   },
 
   // Database Seed API
