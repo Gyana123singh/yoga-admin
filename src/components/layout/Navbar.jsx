@@ -23,7 +23,7 @@ import clsx from 'clsx';
 
 export function Navbar({ isCollapsed, onMobileToggle }) {
   const { darkMode, toggleDarkMode } = useTheme();
-  const { setIsSearchOpen, setIsNotificationsOpen, currentLanguage, setCurrentLanguage, showToast } = useApp();
+  const { setIsSearchOpen, setIsNotificationsOpen, currentLanguage, setCurrentLanguage, showToast, logoutAdmin, adminUser } = useApp();
   const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
   const [isQuickActionOpen, setIsQuickActionOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
@@ -185,8 +185,8 @@ export function Navbar({ isCollapsed, onMobileToggle }) {
             {isProfileOpen && (
               <div className="absolute right-0 mt-2 w-56 p-2 rounded-2xl glass-card-light dark:glass-card-dark border border-slate-200 dark:border-slate-800 shadow-2xl z-50 space-y-1">
                 <div className="px-3 py-2 border-b border-slate-200/60 dark:border-slate-800">
-                  <p className="text-xs font-bold text-slate-900 dark:text-white">Dr. Sarah Jenkins</p>
-                  <p className="text-[10px] text-slate-400">sarah.jenkins@aura.io</p>
+                  <p className="text-xs font-bold text-slate-900 dark:text-white">{adminUser?.name || 'Dr. Sarah Jenkins'}</p>
+                  <p className="text-[10px] text-slate-400">{adminUser?.email || 'sarah.jenkins@aura.io'}</p>
                 </div>
                 <button
                   onClick={() => setIsProfileOpen(false)}
@@ -202,10 +202,10 @@ export function Navbar({ isCollapsed, onMobileToggle }) {
                 </button>
                 <button
                   onClick={() => {
-                    showToast('Logged out safely', 'warning');
                     setIsProfileOpen(false);
+                    logoutAdmin();
                   }}
-                  className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold rounded-xl text-rose-500 hover:bg-rose-500/10"
+                  className="w-full flex items-center gap-2 px-3 py-2 text-xs font-semibold rounded-xl text-rose-500 hover:bg-rose-500/10 cursor-pointer"
                 >
                   <LogOut className="w-4 h-4" /> Sign Out
                 </button>

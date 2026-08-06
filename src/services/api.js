@@ -12,31 +12,59 @@ import {
   MOCK_RECENT_NOTIFICATIONS
 } from '../constants/mockData';
 
-export const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:5000';
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || `${BACKEND_URL}/api`;
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+export const LIVE_API_URL = import.meta.env.VITE_LIVE_API_URL || 'https://apiyoga.hirehand.co.in/api';
+export const BACKEND_URL = API_BASE_URL.replace(/\/api\/?$/, '');
 
+// Smart auto-failover: Try VITE_API_BASE_URL (localhost) first; if unavailable, failover to VITE_LIVE_API_URL
 async function request(endpoint, options = {}) {
-  try {
-    const res = await fetch(`${API_BASE_URL}${endpoint}`, {
-      headers: {
-        'Content-Type': 'application/json',
-        ...options.headers,
-      },
-      ...options,
-    });
-    if (!res.ok) {
-      throw new Error(`API Error: ${res.statusText}`);
+  const primaryUrl = API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL;
+  const secondaryUrl = LIVE_API_URL.endsWith('/') ? LIVE_API_URL.slice(0, -1) : LIVE_API_URL;
+
+  const targetUrls = [primaryUrl, secondaryUrl];
+
+  for (const baseUrl of targetUrls) {
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3500); // 3.5s timeout per attempt
+
+      const res = await fetch(`${baseUrl}${endpoint}`, {
+        headers: {
+          'Content-Type': 'application/json',
+          ...options.headers,
+        },
+        signal: controller.signal,
+        ...options,
+      });
+
+      clearTimeout(timeoutId);
+
+      if (res.ok) {
+        return await res.json();
+      }
+    } catch (err) {
+      console.warn(`[API Auto-Failover] ${baseUrl}${endpoint} failed (${err.message}). Retrying on live server...`);
     }
-    return await res.json();
-  } catch (err) {
-    console.warn(`[API Fallback] Endpoint ${endpoint} failed, utilizing local fallback state.`, err);
-    return null;
   }
+
+  console.warn(`[API Fallback] Both local & live backends unavailable for ${endpoint}. Using fallback state.`);
+  return null;
 }
 
 export const api = {
   BACKEND_URL,
   API_BASE_URL,
+
+  // Admin Auth API
+  async adminLogin(credentials) {
+    const data = await request('/auth/admin-login', {
+      method: 'POST',
+      body: JSON.stringify(credentials)
+    });
+    if (data && data.success) return data;
+    return null;
+  },
+
   // Dashboard API
   async getDashboardStats() {
     const data = await request('/dashboard/stats');
@@ -81,6 +109,19 @@ export const api = {
     };
   },
 
+  async updateUser(id, updateData) {
+    const data = await request(`/users/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(updateData),
+    });
+    if (data && data.success) return data.data;
+    return { id, ...updateData };
+  },
+
+  async deleteUser(id) {
+    return await request(`/users/${id}`, { method: 'DELETE' });
+  },
+
   // Asanas API
   async getAsanas() {
     const data = await request('/asanas');
@@ -98,6 +139,19 @@ export const api = {
       id: `ASN-${Math.floor(10 + Math.random() * 90)}`,
       ...asanaData
     };
+  },
+
+  async updateAsana(id, updateData) {
+    const data = await request(`/asanas/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(updateData),
+    });
+    if (data && data.success) return data.data;
+    return { id, ...updateData };
+  },
+
+  async deleteAsana(id) {
+    return await request(`/asanas/${id}`, { method: 'DELETE' });
   },
 
   // Breathing API
@@ -119,6 +173,19 @@ export const api = {
     };
   },
 
+  async updateBreathingTechnique(id, updateData) {
+    const data = await request(`/breathing/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(updateData),
+    });
+    if (data && data.success) return data.data;
+    return { id, ...updateData };
+  },
+
+  async deleteBreathingTechnique(id) {
+    return await request(`/breathing/${id}`, { method: 'DELETE' });
+  },
+
   // Recommendation Rules API
   async getRecommendationRules() {
     const data = await request('/recommendations');
@@ -138,6 +205,10 @@ export const api = {
       status: 'Active',
       matchCount: 120
     };
+  },
+
+  async deleteRecommendationRule(id) {
+    return await request(`/recommendations/${id}`, { method: 'DELETE' });
   },
 
   // AI Generator API
@@ -185,6 +256,10 @@ export const api = {
     return { id: Date.now().toString(), ...practiceData };
   },
 
+  async deletePractice(id) {
+    return await request(`/practices/${id}`, { method: 'DELETE' });
+  },
+
   // Subscriptions & Coupons API
   async getSubscriptionsSummary() {
     const data = await request('/subscriptions/summary');
@@ -205,6 +280,10 @@ export const api = {
     });
     if (data && data.success) return data.data;
     return { code: couponData.code, ...couponData };
+  },
+
+  async deleteCoupon(id) {
+    return await request(`/subscriptions/coupons/${id}`, { method: 'DELETE' });
   },
 
   // Health Integration API

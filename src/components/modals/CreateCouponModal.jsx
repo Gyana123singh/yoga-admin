@@ -2,17 +2,19 @@ import React, { useState } from 'react';
 import { Modal } from '../common/Modal';
 import { Button } from '../common/Button';
 import { useApp } from '../../context/AppContext';
+import { api } from '../../services/api';
 import { Tag, Percent, DollarSign, Calendar, Users, Shield, Sparkles, Plus, RefreshCw } from 'lucide-react';
 
 export function CreateCouponModal({ isOpen, onClose, onAddCoupon }) {
   const { showToast } = useApp();
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     code: 'AURA50OFF',
     discountType: 'percentage', // 'percentage' | 'fixed'
     discountValue: '20',
     appliesTo: 'All Plans',
     maxRedemptions: '500',
-    expiryDate: '2024-12-31',
+    expiryDate: '2026-12-31',
     status: 'Active',
   });
 
@@ -24,31 +26,38 @@ export function CreateCouponModal({ isOpen, onClose, onAddCoupon }) {
     showToast('Generated fresh coupon code!', 'info');
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.code.trim()) {
       showToast('Please enter a valid coupon code', 'warning');
       return;
     }
 
-    const newCoupon = {
-      id: `CPN-${Math.floor(Math.random() * 9000 + 1000)}`,
-      code: formData.code.trim().toUpperCase(),
-      discountType: formData.discountType,
-      discountValue: formData.discountValue,
-      appliesTo: formData.appliesTo,
-      maxRedemptions: formData.maxRedemptions,
-      expiryDate: formData.expiryDate,
-      status: formData.status,
-      createdAt: new Date().toISOString().split('T')[0],
-    };
+    setIsLoading(true);
 
-    if (onAddCoupon) {
-      onAddCoupon(newCoupon);
+    try {
+      const payload = {
+        code: formData.code.trim().toUpperCase(),
+        discountPercent: Number(formData.discountValue) || 20,
+        validUntil: formData.expiryDate || '2026-12-31',
+        maxRedemptions: Number(formData.maxRedemptions) || 500,
+        planTier: formData.appliesTo || 'All Plans',
+        status: formData.status || 'Active'
+      };
+
+      const created = await api.createCoupon(payload);
+
+      if (onAddCoupon) {
+        onAddCoupon(created);
+      }
+
+      showToast(`Coupon "${created.code || payload.code}" created successfully!`, 'success');
+      onClose();
+    } catch (err) {
+      showToast('Failed to create coupon. Please check server connection.', 'error');
+    } finally {
+      setIsLoading(false);
     }
-
-    showToast(`Coupon "${newCoupon.code}" created successfully!`, 'success');
-    onClose();
   };
 
   return (
@@ -185,7 +194,7 @@ export function CreateCouponModal({ isOpen, onClose, onAddCoupon }) {
           <Button variant="ghost" onClick={onClose} type="button">
             Cancel
           </Button>
-          <Button variant="primary" type="submit" icon={Plus}>
+          <Button variant="primary" type="submit" icon={Plus} isLoading={isLoading}>
             Create Coupon
           </Button>
         </div>
