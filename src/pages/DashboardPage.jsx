@@ -119,14 +119,6 @@ export function DashboardPage() {
           >
             Launch AI Generator
           </Button>
-          <Button
-            variant="cyan"
-            icon={Video}
-            className="w-full xs:w-auto"
-            onClick={() => navigate('/live-classes')}
-          >
-            View Live Streams
-          </Button>
         </div>
       </div>
 
@@ -163,12 +155,12 @@ export function DashboardPage() {
         />
 
         <StatCard
-          title="Watch Sync Connectivity"
-          value={`${stats.watchSyncActive}%`}
+          title="Daily Active Streak"
+          value="94.2%"
           change={4.1}
           changeType="increase"
-          subtitle="Apple Watch & Garmin leading"
-          icon={Watch}
+          subtitle="Consistent daily completion"
+          icon={Flame}
           gradient="amber"
         />
       </div>
@@ -176,118 +168,11 @@ export function DashboardPage() {
       {/* Interactive Charts Section */}
       <OverviewCharts />
 
-      {/* Daily Wellness Schedule 🍃 Widget matching Image 5 */}
-      <div className="p-6 rounded-3xl bg-[#FAF7F2] dark:bg-stone-900 border border-stone-200/80 dark:border-stone-800 shadow-md space-y-4 font-serif">
-        <div className="flex items-center justify-between">
-          <div>
-            <span className="text-xs font-bold text-[#3B4D2B] dark:text-emerald-400 font-sans uppercase tracking-wider block">
-              Customer Home Widget Preview (Image 5)
-            </span>
-            <h3 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-amber-50 flex items-center gap-2 mt-0.5">
-              Daily Wellness Schedule 🍃
-            </h3>
-          </div>
 
-          <button
-            onClick={() => navigate('/calendar')}
-            className="px-4 py-2 rounded-full bg-[#3B4D2B] text-amber-50 text-xs font-sans font-extrabold flex items-center gap-1.5 shadow-md hover:bg-[#2D3C20] transition-colors"
-          >
-            <span>Calendar →</span>
-          </button>
-        </div>
 
-        <div className="p-5 rounded-2xl bg-white dark:bg-stone-950 border border-stone-200/80 dark:border-stone-800 space-y-3 font-sans">
-          <div className="flex items-center justify-between text-xs font-serif border-b border-stone-200/60 dark:border-stone-800 pb-2">
-            <span className="font-extrabold text-slate-900 dark:text-amber-50 uppercase tracking-wider">
-              TODAY'S PRACTICE PLAN
-            </span>
-            <span className="text-stone-500 font-medium">0 of 3 completed</span>
-          </div>
-
-          <div className="space-y-2.5">
-            {[
-              { icon: '☀️', title: 'Morning Mindful Breath', time: '07:15 AM', duration: '10 Minutes' },
-              { icon: '🧘', title: 'Core Yoga Flow', time: '05:00 PM', duration: '20 Minutes' },
-              { icon: '😴', title: 'Sleep Journey Practice', time: '10:00 PM', duration: '15 Minutes' }
-            ].map((item, idx) => (
-              <div
-                key={idx}
-                onClick={() => navigate('/calendar')}
-                className="p-3.5 rounded-xl bg-[#FAF7F2]/80 dark:bg-stone-900/80 border border-stone-200/60 dark:border-stone-800 flex items-center justify-between gap-3 cursor-pointer hover:border-[#3B4D2B] transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <span className="text-lg">{item.icon}</span>
-                  <div>
-                    <h4 className="text-sm font-extrabold font-serif text-slate-900 dark:text-amber-50">{item.title}</h4>
-                    <p className="text-xs font-serif text-stone-500 font-medium">{item.time} • {item.duration}</p>
-                  </div>
-                </div>
-                <span className="w-5 h-5 rounded-full border-2 border-stone-400 shrink-0" />
-              </div>
-            ))}
-          </div>
-
-          <div className="pt-2 text-center">
-            <button
-              onClick={() => navigate('/calendar')}
-              className="text-xs font-extrabold font-serif text-[#3B4D2B] dark:text-emerald-400 hover:underline inline-flex items-center gap-1"
-            >
-              <span>View Calendar →</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Lower Grid: Live Classes & Recent Users */}
+      {/* Lower Grid: Recent Active Members */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Today's Live Streams */}
-        <div className="lg:col-span-1 space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
-              <Video className="w-5 h-5 text-indigo-500 shrink-0" /> Today's Live Classes
-            </h3>
-            <Button variant="ghost" size="sm" onClick={() => navigate('/live-classes')}>
-              View All
-            </Button>
-          </div>
-
-          <div className="space-y-3">
-            {liveClasses.map((cls) => (
-              <div
-                key={cls.id || cls._id}
-                className="p-3.5 sm:p-4 rounded-2xl glass-card-light dark:glass-card-dark border border-slate-200/70 dark:border-slate-800 hover:border-indigo-500/40 transition-all space-y-3"
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <Badge variant={cls.status === 'Live Now' ? 'emerald' : 'indigo'}>
-                    {cls.status}
-                  </Badge>
-                  <span className="text-xs font-semibold text-slate-400">{cls.duration}</span>
-                </div>
-
-                <div>
-                  <h4 className="text-sm font-bold text-slate-900 dark:text-white">{cls.title}</h4>
-                  <div className="flex items-center gap-2 mt-1.5 sm:mt-2">
-                    <img src={cls.instructorAvatar} alt={cls.instructor} className="w-6 h-6 rounded-full object-cover shrink-0" />
-                    <span className="text-xs font-semibold text-slate-600 dark:text-slate-300 truncate">{cls.instructor}</span>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between pt-2 border-t border-slate-200/50 dark:border-slate-800 text-xs font-semibold text-slate-500">
-                  <span>{cls.seatsBooked} / {cls.totalSeats} Seats</span>
-                  <button
-                    onClick={() => navigate('/live-classes')}
-                    className="px-2.5 py-1 rounded-lg bg-indigo-500/10 hover:bg-indigo-500 text-indigo-600 dark:text-indigo-400 hover:text-white transition-all flex items-center gap-1 font-bold"
-                  >
-                    Join <ArrowRight className="w-3 h-3" />
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Recent Users Table */}
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-3">
           <ModernTable
             title="Recent Active Members"
             columns={userColumns}

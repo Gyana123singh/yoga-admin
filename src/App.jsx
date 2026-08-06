@@ -29,6 +29,8 @@ import { CalendarPage } from './pages/CalendarPage';
 import { SchedulePlayerPage } from './pages/SchedulePlayerPage';
 import { CalendarManagerPage } from './pages/CalendarManagerPage';
 import { SettingsPage } from './pages/SettingsPage';
+import { NotificationBroadcastPage } from './pages/NotificationBroadcastPage';
+import { SupportTicketManagerPage } from './pages/SupportTicketManagerPage';
 import { PlaceholderPage } from './pages/PlaceholderPage';
 
 // Icons for placeholder pages
@@ -89,6 +91,8 @@ function AppContent() {
           <Route path="/practice-builder" element={<PracticeBuilderPage />} />
           <Route path="/ai-generator" element={<AIPracticeGeneratorPage />} />
           <Route path="/settings" element={<SettingsPage />} />
+          <Route path="/notifications" element={<NotificationBroadcastPage />} />
+          <Route path="/support-tickets" element={<SupportTicketManagerPage />} />
           <Route path="/flow-builder" element={<PlaceholderPage title="Flow Timeline Builder" description="Visual animation, transition timing, and pose duration editor." icon={Sliders} category="Studio Studio" />} />
           <Route path="/roles" element={<PlaceholderPage title="Roles & RBAC" description="Permissions matrix for Admins, Instructors, and Support." icon={ShieldCheck} category="Security" />} />
           <Route path="/admins" element={<PlaceholderPage title="Admins & Team" description="Staff accounts, two-factor auth status, and access keys." icon={UserCog} category="Security" />} />

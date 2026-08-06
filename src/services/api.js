@@ -660,6 +660,76 @@ export const api = {
     return await request(`/daily-schedule/${id}`, { method: 'DELETE' });
   },
 
+  // Real-Time Notifications API
+  async getNotifications() {
+    const data = await request('/notifications');
+    if (data && data.success) return data.data;
+    return [];
+  },
+
+  async sendRealtimeNotification(payload) {
+    const data = await request('/notifications/send-realtime', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+    if (data && data.success) return data.data;
+    return null;
+  },
+
+  async markNotificationRead(id) {
+    const data = await request(`/notifications/${id}/read`, { method: 'PUT' });
+    if (data && data.success) return data.data;
+    return null;
+  },
+
+  async deleteNotification(id) {
+    return await request(`/notifications/${id}`, { method: 'DELETE' });
+  },
+
+  // Support Tickets API
+  async getTickets(status = 'ALL', search = '') {
+    const data = await request(`/tickets?status=${status}&search=${search}`);
+    if (data && data.success) return data.data;
+    return [];
+  },
+
+  async getTicketById(id) {
+    const data = await request(`/tickets/${id}`);
+    if (data && data.success) return data.data;
+    return null;
+  },
+
+  async createTicket(payload) {
+    const data = await request('/tickets', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+    if (data && data.success) return data.data;
+    return null;
+  },
+
+  async replyTicket(id, payload) {
+    const data = await request(`/tickets/${id}/reply`, {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+    if (data && data.success) return data.data;
+    return null;
+  },
+
+  async updateTicketStatus(id, status) {
+    const data = await request(`/tickets/${id}/status`, {
+      method: 'PUT',
+      body: JSON.stringify({ status })
+    });
+    if (data && data.success) return data.data;
+    return null;
+  },
+
+  async deleteTicket(id) {
+    return await request(`/tickets/${id}`, { method: 'DELETE' });
+  },
+
   async getDailyScheduleMonthStats(year = 2026, month = 7) {
     const data = await request(`/daily-schedule/month-stats?year=${year}&month=${month}`);
     if (data && data.success) return data.data;

@@ -131,46 +131,15 @@ export function OverviewCharts() {
         </CardContent>
       </Card>
 
-      {/* Smartwatch Integration Devices */}
-      <Card>
-        <CardHeader>
-          <CardTitle subtitle="Wearables & Telemetry Sync Rate">
-            Smartwatch Active Devices
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3.5">
-            {SMARTWATCH_USAGE_STATS.map((dev, idx) => (
-              <div key={idx} className="space-y-1">
-                <div className="flex items-center justify-between text-xs font-bold">
-                  <span className="text-slate-800 dark:text-slate-200">{dev.device}</span>
-                  <span className="text-emerald-500">{dev.syncRate} Sync</span>
-                </div>
-                <div className="h-2 w-full bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
-                  <div
-                    className="h-full rounded-full transition-all duration-500"
-                    style={{
-                      width: `${(dev.users / 30000) * 100}%`,
-                      backgroundColor: dev.color
-                    }}
-                  />
-                </div>
-                <p className="text-[10px] font-medium text-slate-400">{dev.users.toLocaleString()} active users</p>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-
       {/* Global Country Demographics */}
-      <Card className="lg:col-span-2">
+      <Card className="lg:col-span-3">
         <CardHeader>
           <CardTitle subtitle="User distribution across major regions">
             Geographic Wellness Footprint
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 gap-2.5 sm:gap-3">
+          <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2.5 sm:gap-3">
             {COUNTRY_ANALYTICS.map((c, idx) => (
               <div key={idx} className="p-3 sm:p-3.5 rounded-xl bg-slate-100/70 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-800 flex items-center gap-3">
                 <span className="text-xl sm:text-2xl shrink-0">{c.flag}</span>
