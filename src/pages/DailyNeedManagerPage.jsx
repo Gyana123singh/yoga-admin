@@ -268,7 +268,7 @@ export function DailyNeedManagerPage() {
             <span>Socket.io Real-time WebSocket Server Connected • Multer & Cloudinary Active</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-            "What Do I Need Today?" Admin Control Center
+            Wellness Routine & Mood Config
           </h1>
           <p className="text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400 mt-1">
             Manage Feelings, Focus Areas, Durations, Session Templates, and Upload Videos linked to Feelings with real-time Socket.io broadcasts.

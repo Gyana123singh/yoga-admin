@@ -53,7 +53,7 @@ export const NAVIGATION_SECTIONS = [
       { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, path: '/', badge: 'Live', badgeColor: 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30' },
       { id: 'users', label: 'Users Directory', icon: Users, path: '/users', badge: '12.4k' },
       { id: 'subscriptions', label: 'Subscriptions & MRR', icon: CreditCard, path: '/subscriptions' },
-      { id: 'daily-needs', label: 'What Do I Need Config', icon: Target, path: '/daily-needs', badge: 'New', badgeColor: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' },
+      { id: 'daily-needs', label: 'Wellness Routine Config', icon: Target, path: '/daily-needs', badge: 'New', badgeColor: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' },
     ]
   },
   {
