@@ -19,7 +19,8 @@ import {
   RefreshCw,
   Radio,
   Sparkles,
-  Inbox
+  Inbox,
+  X
 } from 'lucide-react';
 
 export function SupportTicketManagerPage() {
@@ -417,9 +418,23 @@ export function SupportTicketManagerPage() {
 
       {/* CREATE NEW TEST TICKET MODAL */}
       {showCreateModal && (
-        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 max-w-lg w-full border border-slate-200 dark:border-slate-800 shadow-2xl space-y-4">
-            <h3 className="text-xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+        <div
+          onClick={() => setShowCreateModal(false)}
+          className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4 cursor-pointer"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white dark:bg-slate-900 rounded-3xl p-6 max-w-lg w-full border border-slate-200 dark:border-slate-800 shadow-2xl space-y-4 relative cursor-default"
+          >
+            <button
+              onClick={() => setShowCreateModal(false)}
+              className="absolute top-5 right-5 p-2 rounded-xl text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              title="Close modal"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <h3 className="text-xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2 pr-8">
               <LifeBuoy className="w-6 h-6 text-indigo-500" /> Create New Customer Support Ticket
             </h3>
 

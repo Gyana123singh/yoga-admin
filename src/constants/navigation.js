@@ -80,12 +80,7 @@ export const NAVIGATION_SECTIONS = [
     items: [
       { id: 'settings', label: 'Platform & Security Settings', icon: Settings, path: '/settings' },
       { id: 'notifications', label: 'Real-Time Notifications', icon: Bell, path: '/notifications', badge: 'Live', badgeColor: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' },
-      { id: 'support-tickets', label: 'Support & Helpdesk Desk', icon: LifeBuoy, path: '/support-tickets', badge: 'Live', badgeColor: 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30' },
-      { id: 'roles', label: 'Roles & RBAC', icon: ShieldCheck, path: '/roles' },
-      { id: 'admins', label: 'Admins & Team', icon: UserCog, path: '/admins' },
-      { id: 'activity-logs', label: 'System Audit Logs', icon: History, path: '/activity-logs' },
-      { id: 'api-management', label: 'API & AI Keys', icon: Code2, path: '/api-management' },
-      { id: 'safety', label: 'Safety Center', icon: ShieldAlert, path: '/safety' },
+      { id: 'support-tickets', label: 'Support & Helpdesk Desk', icon: LifeBuoy, path: '/support-tickets', badge: 'Live', badgeColor: 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30' }
     ]
   }
 ];

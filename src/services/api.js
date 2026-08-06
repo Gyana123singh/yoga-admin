@@ -736,6 +736,12 @@ export const api = {
     return { completedDays: 0, partiallyCompleted: 0, missedDays: 31, activeDatesWithStatus: {} };
   },
 
+  async getDailyScheduleWeekStats() {
+    const data = await request('/daily-schedule/week-stats');
+    if (data && data.success) return data.data;
+    return null;
+  },
+
   // Database Seed API
   async seedDatabase() {
     return await request('/seed', { method: 'POST' });

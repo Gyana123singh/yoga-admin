@@ -94,11 +94,6 @@ function AppContent() {
           <Route path="/notifications" element={<NotificationBroadcastPage />} />
           <Route path="/support-tickets" element={<SupportTicketManagerPage />} />
           <Route path="/flow-builder" element={<PlaceholderPage title="Flow Timeline Builder" description="Visual animation, transition timing, and pose duration editor." icon={Sliders} category="Studio Studio" />} />
-          <Route path="/roles" element={<PlaceholderPage title="Roles & RBAC" description="Permissions matrix for Admins, Instructors, and Support." icon={ShieldCheck} category="Security" />} />
-          <Route path="/admins" element={<PlaceholderPage title="Admins & Team" description="Staff accounts, two-factor auth status, and access keys." icon={UserCog} category="Security" />} />
-          <Route path="/activity-logs" element={<PlaceholderPage title="System Audit Logs" description="Real-time security event log and admin actions." icon={History} category="Audit" />} />
-          <Route path="/api-management" element={<PlaceholderPage title="API & AI Keys" description="OpenAI, Anthropic, Stripe, and HealthKit tokens." icon={Code2} category="API" />} />
-          <Route path="/safety" element={<PlaceholderPage title="Safety Center" description="Medical disclaimers, emergency contraindication rules." icon={ShieldAlert} category="Safety" />} />
 
           {/* Catch-all Fallback */}
           <Route path="*" element={<DashboardPage />} />

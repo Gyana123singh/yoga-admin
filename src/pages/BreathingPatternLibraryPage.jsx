@@ -18,7 +18,8 @@ import {
   Flower2,
   Info,
   BookOpen,
-  Sparkles
+  Sparkles,
+  X
 } from 'lucide-react';
 
 export function BreathingPatternLibraryPage() {
@@ -236,9 +237,6 @@ export function BreathingPatternLibraryPage() {
           <Button variant="outline" size="sm" icon={RefreshCw} onClick={loadTechniques}>
             Sync Library
           </Button>
-          <Button variant="primary" size="sm" icon={Plus} onClick={handleOpenAdd}>
-            Add Breathing Technique
-          </Button>
         </div>
       </div>
 
@@ -317,9 +315,23 @@ export function BreathingPatternLibraryPage() {
 
       {/* ADD / EDIT MODAL */}
       {modalState.open && (
-        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 max-w-2xl w-full border border-slate-200 dark:border-slate-800 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto">
-            <h3 className="text-xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+        <div
+          onClick={() => setModalState({ ...modalState, open: false })}
+          className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4 cursor-pointer"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white dark:bg-slate-900 rounded-3xl p-6 max-w-2xl w-full border border-slate-200 dark:border-slate-800 shadow-2xl space-y-5 max-h-[90vh] overflow-y-auto relative cursor-default"
+          >
+            <button
+              onClick={() => setModalState({ ...modalState, open: false })}
+              className="absolute top-5 right-5 p-2 rounded-xl text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              title="Close modal"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <h3 className="text-xl font-extrabold text-slate-900 dark:text-white flex items-center gap-2 pr-8">
               <Wind className="w-6 h-6 text-emerald-500" />
               {modalState.isEdit ? 'Edit Breathing Technique' : 'Add Breathing Technique'}
             </h3>

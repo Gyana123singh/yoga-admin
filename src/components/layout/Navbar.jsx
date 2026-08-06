@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useTheme } from '../../context/ThemeContext';
 import { useApp } from '../../context/AppContext';
 import {
@@ -27,6 +27,29 @@ export function Navbar({ isCollapsed, onMobileToggle }) {
   const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
   const [isQuickActionOpen, setIsQuickActionOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+
+  const profileRef = useRef(null);
+  const langRef = useRef(null);
+  const quickActionRef = useRef(null);
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (profileRef.current && !profileRef.current.contains(event.target)) {
+        setIsProfileOpen(false);
+      }
+      if (langRef.current && !langRef.current.contains(event.target)) {
+        setIsLangDropdownOpen(false);
+      }
+      if (quickActionRef.current && !quickActionRef.current.contains(event.target)) {
+        setIsQuickActionOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   const languages = ['English (US)', 'Spanish (ES)', 'German (DE)', 'French (FR)', 'Japanese (JP)'];
 
@@ -72,7 +95,7 @@ export function Navbar({ isCollapsed, onMobileToggle }) {
         {/* Right Side: Actions */}
         <div className="flex items-center gap-2 sm:gap-3">
           {/* Quick Practice AI Generator Button */}
-          <div className="relative">
+          <div className="relative" ref={quickActionRef}>
             <Button
               variant="cyan"
               size="sm"
@@ -116,7 +139,7 @@ export function Navbar({ isCollapsed, onMobileToggle }) {
           </div>
 
           {/* Language Selector */}
-          <div className="relative">
+          <div className="relative" ref={langRef}>
             <button
               onClick={() => setIsLangDropdownOpen(!isLangDropdownOpen)}
               className="p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors flex items-center gap-1 text-xs font-semibold"
@@ -170,7 +193,7 @@ export function Navbar({ isCollapsed, onMobileToggle }) {
           </button>
 
           {/* Admin Avatar Menu */}
-          <div className="relative pl-2 border-l border-slate-200/60 dark:border-slate-800">
+          <div className="relative pl-2 border-l border-slate-200/60 dark:border-slate-800" ref={profileRef}>
             <button
               onClick={() => setIsProfileOpen(!isProfileOpen)}
               className="flex items-center gap-2 p-1 rounded-xl hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors cursor-pointer"

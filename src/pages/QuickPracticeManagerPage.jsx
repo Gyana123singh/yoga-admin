@@ -17,7 +17,8 @@ import {
   Upload,
   Circle,
   Sliders,
-  Wind
+  Wind,
+  X
 } from 'lucide-react';
 
 export function QuickPracticeManagerPage() {
@@ -178,32 +179,6 @@ export function QuickPracticeManagerPage() {
           <Button variant="outline" size="sm" icon={RefreshCw} onClick={loadPractices}>
             Sync Database
           </Button>
-          <Button
-            variant="primary"
-            size="sm"
-            icon={Plus}
-            onClick={() => setFormModal({
-              open: true,
-              isEdit: false,
-              id: null,
-              title: '',
-              subtitle: '',
-              category: 'quick_timer',
-              icon: 'clock',
-              durationMinutes: 2,
-              badgeText: 'Quick Practice Session',
-              bgImageUrlCustom: '',
-              frameDesignUrlCustom: '',
-              bgMusicUrlCustom: '',
-              voiceGuidanceUrlCustom: '',
-              bgImageFile: null,
-              frameDesignFile: null,
-              bgMusicFile: null,
-              voiceGuidanceFile: null
-            })}
-          >
-            Add New Practice Item
-          </Button>
         </div>
       </div>
 
@@ -342,11 +317,25 @@ export function QuickPracticeManagerPage() {
         </CardContent>
       </Card>
 
-      {/* FORM MODAL WITH MULTER FILE UPLOAD + OPTIONAL URL INPUTS */}
+      {/* FORM MODAL */}
       {formModal.open && (
-        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 max-w-xl w-full border border-slate-200 dark:border-slate-800 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+        <div
+          onClick={closeForm}
+          className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4 cursor-pointer"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white dark:bg-slate-900 rounded-3xl p-6 max-w-xl w-full border border-slate-200 dark:border-slate-800 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto relative cursor-default"
+          >
+            <button
+              onClick={closeForm}
+              className="absolute top-5 right-5 p-2 rounded-xl text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              title="Close modal"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2 pr-8">
               <Upload className="w-5 h-5 text-amber-500" />
               {formModal.isEdit ? 'Edit Quick Practice / SOS Item' : 'Add New Quick Practice / SOS Item'}
             </h3>

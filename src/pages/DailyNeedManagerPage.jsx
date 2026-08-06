@@ -18,7 +18,8 @@ import {
   Upload,
   Play,
   Zap,
-  Radio
+  Radio,
+  X
 } from 'lucide-react';
 
 export function DailyNeedManagerPage() {
@@ -291,14 +292,6 @@ export function DailyNeedManagerPage() {
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" icon={RefreshCw} onClick={loadAllData}>
             Sync Backend
-          </Button>
-          <Button
-            variant="primary"
-            size="sm"
-            icon={Upload}
-            onClick={() => setVideoForm({ open: true, title: '', feeling: 'Calm', focusArea: 'Belly / Core strength', stepTitle: '1. Breath Preparation', videoUrlCustom: '', file: null })}
-          >
-            Upload Video
           </Button>
         </div>
       </div>
@@ -706,9 +699,23 @@ export function DailyNeedManagerPage() {
 
       {/* FORM MODAL: Add/Edit Feeling */}
       {feelingForm.open && (
-        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 max-w-md w-full border border-slate-200 dark:border-slate-800 shadow-2xl space-y-4">
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+        <div
+          onClick={() => setFeelingForm({ open: false, isEdit: false, id: null, name: '', emoji: '😊', description: '' })}
+          className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4 cursor-pointer"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white dark:bg-slate-900 rounded-3xl p-6 max-w-md w-full border border-slate-200 dark:border-slate-800 shadow-2xl space-y-4 relative cursor-default"
+          >
+            <button
+              onClick={() => setFeelingForm({ open: false, isEdit: false, id: null, name: '', emoji: '😊', description: '' })}
+              className="absolute top-5 right-5 p-2 rounded-xl text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              title="Close modal"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white pr-8">
               {feelingForm.isEdit ? 'Edit Feeling Option' : 'Add New Feeling Option'}
             </h3>
             <form onSubmit={handleSaveFeeling} className="space-y-4">
@@ -762,9 +769,23 @@ export function DailyNeedManagerPage() {
 
       {/* FORM MODAL: Add/Edit Focus Area */}
       {focusForm.open && (
-        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 max-w-md w-full border border-slate-200 dark:border-slate-800 shadow-2xl space-y-4">
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+        <div
+          onClick={() => setFocusForm({ open: false, isEdit: false, id: null, name: '', icon: 'target', relatedFeelings: [] })}
+          className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4 cursor-pointer"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white dark:bg-slate-900 rounded-3xl p-6 max-w-md w-full border border-slate-200 dark:border-slate-800 shadow-2xl space-y-4 relative cursor-default"
+          >
+            <button
+              onClick={() => setFocusForm({ open: false, isEdit: false, id: null, name: '', icon: 'target', relatedFeelings: [] })}
+              className="absolute top-5 right-5 p-2 rounded-xl text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              title="Close modal"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white pr-8">
               {focusForm.isEdit ? 'Edit Focus Area' : 'Add New Focus Area'}
             </h3>
             <form onSubmit={handleSaveFocusArea} className="space-y-4">
