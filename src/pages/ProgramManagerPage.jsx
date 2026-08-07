@@ -808,17 +808,20 @@ export function ProgramManagerPage() {
                           const formData = new FormData();
                           formData.append('media', file);
                           try {
-                            const res = await fetch('http://localhost:5000/api/quick-practices/upload', {
+                            const uploadEndpoint = `${api.API_BASE_URL}/yoga-programs/upload`;
+                            const res = await fetch(uploadEndpoint, {
                               method: 'POST',
                               body: formData
                             });
                             if (res.ok) {
                               const data = await res.json();
-                              const uploadedUrl = data.url;
+                              const uploadedUrl = data.url || data.data?.url;
                               const updated = [...scheduleModal.steps];
                               updated[idx].videoUrl = uploadedUrl;
                               setScheduleModal({ ...scheduleModal, steps: updated });
-                              showToast(`Step video file uploaded successfully!`, 'success');
+                              showToast(`Step video uploaded successfully!`, 'success');
+                            } else {
+                              showToast(`Upload error code ${res.status}`, 'error');
                             }
                           } catch (err) {
                             showToast(`Upload failed: ${err.message}`, 'error');
@@ -829,7 +832,7 @@ export function ProgramManagerPage() {
                       <input
                         type="url"
                         placeholder="OR enter Video URL (e.g. https://cdn.pixabay.com/video/...)"
-                        value={st.videoUrl}
+                        value={st.videoUrl || ''}
                         onChange={(e) => {
                           const updated = [...scheduleModal.steps];
                           updated[idx].videoUrl = e.target.value;
@@ -837,6 +840,12 @@ export function ProgramManagerPage() {
                         }}
                         className="w-full px-3 py-2 text-xs font-bold rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white"
                       />
+                      {st.videoUrl && (
+                        <div className="flex items-center justify-between p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs font-bold text-emerald-600 dark:text-emerald-400 mt-1">
+                          <span className="truncate max-w-[80%]">📹 Linked: {st.videoUrl}</span>
+                          <a href={st.videoUrl} target="_blank" rel="noreferrer" className="underline text-[10px]">Preview ↗</a>
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}
