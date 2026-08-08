@@ -13,7 +13,7 @@ export function SettingsPage() {
   const [settings, setSettings] = useState({
     siteName: 'AURA Yoga & Mindfulness Platform',
     aiModelVersion: 'v2.4-NeuralFlow',
-    stripeKeyConfig: 'sk-proj-aura-ai-yoga-9042-secret-key-prod',
+    razorpayKeyConfig: 'rzp_test_51Pq349YogaKey2026',
     healthKitEnabled: true,
     telemetrySyncInterval: '15 mins',
   });
@@ -35,7 +35,7 @@ export function SettingsPage() {
   };
 
   const tabs = [
-    { id: 'ai-keys', label: 'AI & API Keys', icon: Key },
+    { id: 'ai-keys', label: 'AI & Payment Gateway Keys', icon: Key },
     { id: 'general', label: 'Platform Branding', icon: Sliders },
     { id: 'security', label: 'Security & Roles', icon: ShieldCheck },
   ];
@@ -49,7 +49,7 @@ export function SettingsPage() {
             <Settings className="w-6 h-6 sm:w-7 sm:h-7 text-indigo-500 shrink-0" /> Platform System Settings
           </h1>
           <p className="text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400 mt-1">
-            Manage LLM model API keys, branding theme tokens, payment webhooks, and security policies.
+            Manage LLM model API keys, Razorpay payment credentials, branding theme tokens, and security policies.
           </p>
         </div>
 
@@ -65,18 +65,18 @@ export function SettingsPage() {
       {activeTab === 'ai-keys' && (
         <Card className="space-y-4">
           <CardHeader>
-            <CardTitle subtitle="Configure generative practice models & voice synthesis endpoints">
-              AI Provider Configurations
+            <CardTitle subtitle="Configure generative practice models & payment gateway credentials">
+              AI & Payment Gateway Configurations
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <label className="block text-xs font-bold text-slate-500 uppercase mb-1">OpenAI API Key (GPT-4o Practice Generator)</label>
+              <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Razorpay Key ID (Payment Gateway)</label>
               <div className="relative">
                 <input
                   type={showKey ? 'text' : 'password'}
-                  value={settings.stripeKeyConfig || ''}
-                  onChange={(e) => setSettings({ ...settings, stripeKeyConfig: e.target.value })}
+                  value={settings.razorpayKeyConfig || ''}
+                  onChange={(e) => setSettings({ ...settings, razorpayKeyConfig: e.target.value })}
                   className="w-full pl-4 pr-10 py-2 text-sm rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 font-mono text-slate-800 dark:text-slate-200"
                 />
                 <button

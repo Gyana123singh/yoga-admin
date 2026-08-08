@@ -216,58 +216,19 @@ export function CalendarManagerPage() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Category</label>
-                  <select
-                    value={formModal.category}
-                    onChange={(e) => setFormModal({ ...formModal, category: e.target.value })}
-                    className="w-full px-4 py-2.5 text-xs font-bold rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
-                  >
-                    <option value="Breathing">Breathing</option>
-                    <option value="Yoga">Yoga</option>
-                    <option value="Meditation">Meditation</option>
-                    <option value="Relaxation">Relaxation</option>
-                    <option value="Sleep">Sleep</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Scheduled Date</label>
-                  <input
-                    type="date"
-                    required
-                    value={formModal.scheduledDate}
-                    onChange={(e) => setFormModal({ ...formModal, scheduledDate: e.target.value })}
-                    className="w-full px-4 py-2.5 text-xs font-bold rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Scheduled Time</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="07:15 AM"
-                    value={formModal.scheduledTime}
-                    onChange={(e) => setFormModal({ ...formModal, scheduledTime: e.target.value })}
-                    className="w-full px-4 py-2.5 text-xs font-bold rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Duration (Minutes)</label>
-                  <input
-                    type="number"
-                    required
-                    min="1"
-                    value={formModal.durationMinutes}
-                    onChange={(e) => setFormModal({ ...formModal, durationMinutes: e.target.value })}
-                    className="w-full px-4 py-2.5 text-xs font-bold rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
-                  />
-                </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Category</label>
+                <select
+                  value={formModal.category}
+                  onChange={(e) => setFormModal({ ...formModal, category: e.target.value })}
+                  className="w-full px-4 py-2.5 text-xs font-bold rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
+                >
+                  <option value="Breathing">Breathing</option>
+                  <option value="Yoga">Yoga</option>
+                  <option value="Meditation">Meditation</option>
+                  <option value="Relaxation">Relaxation</option>
+                  <option value="Sleep">Sleep</option>
+                </select>
               </div>
 
               {/* Background Nature Image Upload + Optional URL */}
