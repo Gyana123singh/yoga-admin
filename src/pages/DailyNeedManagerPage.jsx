@@ -38,7 +38,7 @@ export function DailyNeedManagerPage() {
   // Admin Form Modals
   const [feelingForm, setFeelingForm] = useState({ open: false, isEdit: false, id: null, name: '', emoji: '😊', description: '' });
   const [focusForm, setFocusForm] = useState({ open: false, isEdit: false, id: null, name: '', icon: 'target', relatedFeelings: [] });
-  const [durationForm, setDurationForm] = useState({ open: false, isEdit: false, id: null, label: '', minutes: 15 });
+  const [durationForm, setDurationForm] = useState({ open: false, isEdit: false, id: null, label: '', minutes: 15, relatedFeelings: [] });
   const [sessionForm, setSessionForm] = useState({ open: false, feeling: 'Calm', focusArea: 'Belly / Core strength', durationMinutes: 20, title: '', stepsText: '' });
   const [videoForm, setVideoForm] = useState({ open: false, title: '', feeling: 'Calm', focusArea: 'Belly / Core strength', stepTitle: '1. Breath Preparation', videoUrlCustom: '', file: null });
   const [quickPracticeForm, setQuickPracticeForm] = useState({
@@ -87,15 +87,15 @@ export function DailyNeedManagerPage() {
   const handleSaveFeeling = async (e) => {
     e.preventDefault();
     if (feelingForm.isEdit) {
-      const updated = await api.updateFeeling(feelingForm.id, { name: feelingForm.name, emoji: feelingForm.emoji, description: feelingForm.description });
+      const updated = await api.updateFeeling(feelingForm.id, { name: feelingForm.name, emoji: feelingForm.emoji, description: feelingForm.description, relatedDurations: feelingForm.relatedDurations });
       setFeelings((prev) => prev.map((f) => (f._id === feelingForm.id ? updated : f)));
       showToast(`Feeling "${feelingForm.name}" updated`, 'success');
     } else {
-      const created = await api.createFeeling({ name: feelingForm.name, emoji: feelingForm.emoji, description: feelingForm.description, order: feelings.length + 1 });
+      const created = await api.createFeeling({ name: feelingForm.name, emoji: feelingForm.emoji, description: feelingForm.description, relatedDurations: feelingForm.relatedDurations, order: feelings.length + 1 });
       setFeelings((prev) => [...prev, created]);
       showToast(`Feeling "${feelingForm.name}" created`, 'success');
     }
-    setFeelingForm({ open: false, isEdit: false, id: null, name: '', emoji: '😊', description: '' });
+    setFeelingForm({ open: false, isEdit: false, id: null, name: '', emoji: '😊', description: '', relatedDurations: [] });
   };
 
   const handleDeleteFeeling = async (id, name) => {
@@ -125,20 +125,38 @@ export function DailyNeedManagerPage() {
     showToast(`Focus area "${name}" deleted`, 'info');
   };
 
+const PRESET_DURATIONS = [2, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60];
+
   // Admin Duration Actions
   const handleSaveDuration = async (e) => {
     e.preventDefault();
-    const label = `${durationForm.minutes} min`;
+    const rawVal = String(durationForm.minutes || '');
+    const parsedNums = rawVal
+      .split(',')
+      .map((s) => parseInt(s.trim()))
+      .filter((n) => !isNaN(n) && n > 0);
+
+    const selectedMins = parsedNums.length > 0 ? parsedNums : (durationForm.selectedMinutes && durationForm.selectedMinutes.length > 0 ? durationForm.selectedMinutes : [15]);
+    const primaryMin = selectedMins[0] || 15;
+    const label = `${primaryMin} min`;
+
+    const payload = {
+      label,
+      minutes: primaryMin,
+      selectedMinutes: selectedMins,
+      relatedFeelings: durationForm.relatedFeelings || []
+    };
+
     if (durationForm.isEdit) {
-      const updated = await api.updateDuration(durationForm.id, { label, minutes: Number(durationForm.minutes) });
+      const updated = await api.updateDuration(durationForm.id, payload);
       setDurations((prev) => prev.map((d) => (d._id === durationForm.id ? updated : d)));
       showToast(`Duration "${label}" updated`, 'success');
     } else {
-      const created = await api.createDuration({ label, minutes: Number(durationForm.minutes), order: durations.length + 1 });
-      setDurations((prev) => [...prev, created]);
-      showToast(`Duration "${label}" created`, 'success');
+      await api.createDuration(payload);
+      loadAllData();
+      showToast(`Duration Options created/updated`, 'success');
     }
-    setDurationForm({ open: false, isEdit: false, id: null, label: '', minutes: 15 });
+    setDurationForm({ open: false, isEdit: false, id: null, label: '', minutes: '15', selectedMinutes: [], relatedFeelings: [] });
   };
 
   const handleDeleteDuration = async (id, label) => {
@@ -147,9 +165,46 @@ export function DailyNeedManagerPage() {
     showToast(`Duration "${label}" deleted`, 'info');
   };
 
+  // Routine Steps Duration Calculator & Auto-Balancer
+  const calculateStepsSum = (text) => {
+    if (!text) return 0;
+    return text
+      .split('\n')
+      .filter((line) => line.trim())
+      .reduce((sum, line) => {
+        const parts = line.split('-').map((p) => p.trim());
+        if (parts.length < 2) return sum;
+        const match = parts[0].match(/(\d+)/);
+        return sum + (match ? parseInt(match[1]) : 0);
+      }, 0);
+  };
+
+  const autoBalanceStepsText = (totalMins, feeling, focusArea) => {
+    const total = Math.max(1, Number(totalMins) || 20);
+    let breath = Math.max(1, Math.floor(total * 0.2));
+    let relax = Math.max(1, Math.floor(total * 0.15));
+    let cool = Math.max(1, Math.floor(total * 0.1));
+    let flow = total - (breath + relax + cool);
+    if (flow < 1) {
+      flow = 1;
+      breath = 1;
+      relax = 1;
+      cool = Math.max(1, total - 3);
+    }
+    return `${breath} min - Breath preparation (${feeling || 'Calm'} reset)\n${flow} min - ${focusArea || 'Core'} flow\n${relax} min - Deep body relaxation\n${cool} min - Cooling breath`;
+  };
+
   // Admin Session Config Actions
   const handleSaveSessionConfig = async (e) => {
     e.preventDefault();
+    const targetMins = Number(sessionForm.durationMinutes) || 20;
+    const stepsSum = calculateStepsSum(sessionForm.stepsText);
+
+    if (stepsSum !== targetMins) {
+      showToast(`Validation Failed: Sum of step durations (${stepsSum} min) must EQUAL target duration (${targetMins} min).`, 'error');
+      return;
+    }
+
     const steps = sessionForm.stepsText.split('\n').filter(s => s.trim()).map((line, idx) => {
       const parts = line.split('-').map(p => p.trim());
       return {
@@ -163,15 +218,10 @@ export function DailyNeedManagerPage() {
     const sessionPayload = {
       feeling: sessionForm.feeling,
       focusArea: sessionForm.focusArea,
-      durationMinutes: Number(sessionForm.durationMinutes),
-      title: sessionForm.title || `${sessionForm.durationMinutes}-Minute ${sessionForm.focusArea} & ${sessionForm.feeling}`,
+      durationMinutes: targetMins,
+      title: sessionForm.title || `${targetMins}-Minute ${sessionForm.focusArea} & ${sessionForm.feeling}`,
       badge: 'YOUR PERSONAL SESSION',
-      steps: steps.length > 0 ? steps : [
-        { id: 'step-1', duration: '4 min', title: `Breath preparation (${sessionForm.feeling} reset)`, category: 'Breath' },
-        { id: 'step-2', duration: '11 min', title: `${sessionForm.focusArea} flow`, category: 'Yoga Flow' },
-        { id: 'step-3', duration: '3 min', title: 'Deep body relaxation', category: 'Relaxation' },
-        { id: 'step-4', duration: '2 min', title: 'Cooling breath', category: 'Cooling' }
-      ]
+      steps: steps
     };
 
     const created = await api.createSessionConfig(sessionPayload);
@@ -452,7 +502,7 @@ export function DailyNeedManagerPage() {
           <Card>
             <CardHeader
               actions={
-                <Button variant="primary" size="sm" icon={Plus} onClick={() => setDurationForm({ open: true, isEdit: false, id: null, label: '', minutes: 20 })}>
+                <Button variant="primary" size="sm" icon={Plus} onClick={() => setDurationForm({ open: true, isEdit: false, id: null, label: '', minutes: 20, relatedFeelings: [] })}>
                   Add Duration
                 </Button>
               }
@@ -462,7 +512,7 @@ export function DailyNeedManagerPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 {durations.map((d) => (
                   <div
                     key={d._id || d.id}
@@ -475,7 +525,7 @@ export function DailyNeedManagerPage() {
 
                     <div className="flex items-center gap-1 opacity-90 group-hover:opacity-100 pt-1">
                       <button
-                        onClick={() => setDurationForm({ open: true, isEdit: true, id: d._id || d.id, label: d.label, minutes: d.minutes })}
+                        onClick={() => setDurationForm({ open: true, isEdit: true, id: d._id || d.id, label: d.label, minutes: d.minutes, relatedFeelings: d.relatedFeelings || [] })}
                         className="p-1.5 rounded-lg text-slate-400 hover:text-indigo-500 hover:bg-indigo-500/10 transition-colors"
                       >
                         <Edit2 className="w-4 h-4" />
@@ -486,6 +536,22 @@ export function DailyNeedManagerPage() {
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
+                    </div>
+
+                    {/* Associated Feelings Chips */}
+                    <div className="flex flex-wrap items-center justify-center gap-1.5 pt-2 border-t border-slate-200/50 dark:border-slate-800 w-full">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider w-full text-center">Active under feelings:</span>
+                      {d.relatedFeelings && d.relatedFeelings.length > 0 ? (
+                        d.relatedFeelings.map((rel, rIdx) => (
+                          <Badge key={rIdx} variant="indigo" size="sm">
+                            {rel}
+                          </Badge>
+                        ))
+                      ) : (
+                        <Badge variant="slate" size="sm">
+                          All Feelings
+                        </Badge>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -499,7 +565,7 @@ export function DailyNeedManagerPage() {
           <Card>
             <CardHeader
               actions={
-                <Button variant="primary" size="sm" icon={Plus} onClick={() => setSessionForm({ open: true, feeling: 'Calm', focusArea: 'Belly / Core strength', durationMinutes: 20, title: '', stepsText: '' })}>
+                <Button variant="primary" size="sm" icon={Plus} onClick={() => setSessionForm({ open: true, feeling: 'Calm', focusArea: 'Belly / Core strength', durationMinutes: 20, title: '', stepsText: autoBalanceStepsText(20, 'Calm', 'Belly / Core strength') })}>
                   Add Session Template
                 </Button>
               }
@@ -755,7 +821,7 @@ export function DailyNeedManagerPage() {
               </div>
 
               <div className="flex items-center justify-end gap-2 pt-2">
-                <Button variant="ghost" type="button" onClick={() => setFeelingForm({ open: false, isEdit: false, id: null, name: '', emoji: '😊', description: '' })}>
+                <Button variant="ghost" type="button" onClick={() => setFeelingForm({ open: false, isEdit: false, id: null, name: '', emoji: '😊', description: '', relatedDurations: [] })}>
                   Cancel
                 </Button>
                 <Button variant="primary" type="submit">
@@ -842,28 +908,78 @@ export function DailyNeedManagerPage() {
 
       {/* FORM MODAL: Add/Edit Duration */}
       {durationForm.open && (
-        <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-slate-900 rounded-3xl p-6 max-w-md w-full border border-slate-200 dark:border-slate-800 shadow-2xl space-y-4">
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+        <div
+          onClick={() => setDurationForm({ open: false, isEdit: false, id: null, label: '', minutes: 15, relatedFeelings: [] })}
+          className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4 cursor-pointer"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white dark:bg-slate-900 rounded-3xl p-6 max-w-md w-full border border-slate-200 dark:border-slate-800 shadow-2xl space-y-4 relative cursor-default"
+          >
+            <button
+              onClick={() => setDurationForm({ open: false, isEdit: false, id: null, label: '', minutes: 15, relatedFeelings: [] })}
+              className="absolute top-5 right-5 p-2 rounded-xl text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              title="Close modal"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white pr-8">
               {durationForm.isEdit ? 'Edit Duration Option' : 'Add New Duration Option'}
             </h3>
             <form onSubmit={handleSaveDuration} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Duration Minutes</label>
+                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Duration Minutes (Custom or Main)</label>
                 <input
-                  type="number"
+                  type="text"
                   required
-                  min="1"
-                  max="120"
-                  placeholder="e.g. 20"
+                  placeholder="e.g. 5, 10, 15, 20"
                   value={durationForm.minutes}
-                  onChange={(e) => setDurationForm({ ...durationForm, minutes: e.target.value })}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    const parsed = val
+                      .split(',')
+                      .map((s) => parseInt(s.trim()))
+                      .filter((n) => !isNaN(n) && n > 0);
+                    setDurationForm({
+                      ...durationForm,
+                      minutes: val,
+                      selectedMinutes: parsed
+                    });
+                  }}
                   className="w-full px-4 py-2.5 text-xs font-bold rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
                 />
               </div>
 
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Associated Feelings (Dynamic Flutter Filter)</label>
+                <div className="space-y-1.5 max-h-40 overflow-y-auto p-3 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                  {feelings.map((f) => {
+                    const isChecked = (durationForm.relatedFeelings || []).includes(f.name);
+                    return (
+                      <label key={f._id || f.id} className="flex items-center gap-2 text-xs font-bold text-slate-800 dark:text-slate-200 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={(e) => {
+                            const current = durationForm.relatedFeelings || [];
+                            if (e.target.checked) {
+                              setDurationForm({ ...durationForm, relatedFeelings: [...current, f.name] });
+                            } else {
+                              setDurationForm({ ...durationForm, relatedFeelings: current.filter((rf) => rf !== f.name) });
+                            }
+                          }}
+                          className="rounded text-indigo-600"
+                        />
+                        <span>{f.emoji} {f.name}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
+
               <div className="flex items-center justify-end gap-2 pt-2">
-                <Button variant="ghost" type="button" onClick={() => setDurationForm({ open: false, isEdit: false, id: null, label: '', minutes: 15 })}>
+                <Button variant="ghost" type="button" onClick={() => setDurationForm({ open: false, isEdit: false, id: null, label: '', minutes: 15, relatedFeelings: [] })}>
                   Cancel
                 </Button>
                 <Button variant="primary" type="submit">
@@ -914,8 +1030,17 @@ export function DailyNeedManagerPage() {
                 <input
                   type="number"
                   required
+                  min="1"
                   value={sessionForm.durationMinutes}
-                  onChange={(e) => setSessionForm({ ...sessionForm, durationMinutes: e.target.value })}
+                  onChange={(e) => {
+                    const mins = e.target.value;
+                    const autoText = autoBalanceStepsText(mins, sessionForm.feeling, sessionForm.focusArea);
+                    setSessionForm({
+                      ...sessionForm,
+                      durationMinutes: mins,
+                      stepsText: autoText
+                    });
+                  }}
                   className="w-full px-4 py-2.5 text-xs font-bold rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
                 />
               </div>
@@ -932,7 +1057,21 @@ export function DailyNeedManagerPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Routine Steps (One per line: duration - title)</label>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="block text-xs font-bold text-slate-500 uppercase">
+                    Routine Steps (One per line: duration - title)
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const balanced = autoBalanceStepsText(sessionForm.durationMinutes, sessionForm.feeling, sessionForm.focusArea);
+                      setSessionForm({ ...sessionForm, stepsText: balanced });
+                    }}
+                    className="text-[11px] font-bold text-indigo-500 hover:text-indigo-600 underline"
+                  >
+                    Auto-Balance to {sessionForm.durationMinutes || 20} min
+                  </button>
+                </div>
                 <textarea
                   rows={4}
                   placeholder={`4 min - Breath preparation (Calm reset)\n11 min - Belly / Core strength flow\n3 min - Deep body relaxation\n2 min - Cooling breath`}
@@ -940,6 +1079,33 @@ export function DailyNeedManagerPage() {
                   onChange={(e) => setSessionForm({ ...sessionForm, stepsText: e.target.value })}
                   className="w-full px-4 py-2.5 text-xs font-bold rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white font-mono"
                 />
+
+                {/* Real-Time Duration Sum Validator */}
+                {(() => {
+                  const targetMins = Number(sessionForm.durationMinutes) || 20;
+                  const currentSum = calculateStepsSum(sessionForm.stepsText);
+                  const isMatch = currentSum === targetMins;
+                  return (
+                    <div className={`flex items-center justify-between text-xs mt-2 p-2.5 rounded-xl border font-bold ${
+                      isMatch 
+                        ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400' 
+                        : 'bg-rose-500/10 border-rose-500/30 text-rose-500'
+                    }`}>
+                      <span className="flex items-center gap-1.5">
+                        <span>{isMatch ? '✅' : '⚠️'}</span>
+                        <span>Routine Steps Total Duration:</span>
+                      </span>
+                      <span className="font-mono text-xs font-extrabold">
+                        {currentSum} / {targetMins} min
+                        {!isMatch && (
+                          <span className="font-sans font-normal text-[11px] ml-1.5 text-rose-500/90">
+                            ({currentSum > targetMins ? `+${currentSum - targetMins} min over` : `${targetMins - currentSum} min remaining`})
+                          </span>
+                        )}
+                      </span>
+                    </div>
+                  );
+                })()}
               </div>
 
               <div className="flex items-center justify-end gap-2 pt-2">
