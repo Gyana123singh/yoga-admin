@@ -18,6 +18,8 @@ import {
   Flower2,
   BookOpen,
   Sparkles,
+  Volume2,
+  Mic,
   X
 } from 'lucide-react';
 
@@ -57,7 +59,9 @@ export function ExerciseLibraryPage() {
     frameDesignFile: null,
     frameDesignUrlCustom: '',
     bgMusicFile: null,
-    bgMusicUrlCustom: ''
+    bgMusicUrlCustom: '',
+    voiceGuidanceFile: null,
+    voiceGuidanceUrlCustom: ''
   });
 
   useEffect(() => {
@@ -100,7 +104,9 @@ export function ExerciseLibraryPage() {
       frameDesignFile: null,
       frameDesignUrlCustom: '',
       bgMusicFile: null,
-      bgMusicUrlCustom: ''
+      bgMusicUrlCustom: '',
+      voiceGuidanceFile: null,
+      voiceGuidanceUrlCustom: ''
     });
   };
 
@@ -133,7 +139,9 @@ export function ExerciseLibraryPage() {
       frameDesignFile: null,
       frameDesignUrlCustom: item.frameDesignUrl || '',
       bgMusicFile: null,
-      bgMusicUrlCustom: item.bgMusicUrl || ''
+      bgMusicUrlCustom: item.bgMusicUrl || '',
+      voiceGuidanceFile: null,
+      voiceGuidanceUrlCustom: item.voiceGuidanceUrl || ''
     });
   };
 
@@ -171,6 +179,9 @@ export function ExerciseLibraryPage() {
 
     if (modalState.bgMusicFile) formData.append('bgMusic', modalState.bgMusicFile);
     formData.append('bgMusicUrlCustom', modalState.bgMusicUrlCustom);
+
+    if (modalState.voiceGuidanceFile) formData.append('voiceGuidance', modalState.voiceGuidanceFile);
+    formData.append('voiceGuidanceUrlCustom', modalState.voiceGuidanceUrlCustom);
 
     try {
       if (modalState.isEdit) {
@@ -268,6 +279,18 @@ export function ExerciseLibraryPage() {
                     <span>Demo Video:</span>
                     <strong className="text-emerald-500 flex items-center gap-1 font-bold">
                       <Video className="w-3.5 h-3.5" /> Uploaded
+                    </strong>
+                  </p>
+                  <p className="flex items-center justify-between">
+                    <span>Background Image:</span>
+                    <strong className="text-emerald-400 flex items-center gap-1 font-bold">
+                      <ImageIcon className="w-3.5 h-3.5" /> {item.bgImageUrl ? 'Configured' : 'Default'}
+                    </strong>
+                  </p>
+                  <p className="flex items-center justify-between">
+                    <span>Voice Guidance:</span>
+                    <strong className="text-sky-400 flex items-center gap-1 font-bold">
+                      <Volume2 className="w-3.5 h-3.5" /> {item.voiceGuidanceUrl ? 'Voice Set' : 'Default'}
                     </strong>
                   </p>
                   <p className="flex items-center justify-between">
@@ -420,6 +443,26 @@ export function ExerciseLibraryPage() {
                   />
                 </div>
 
+                {/* BACKGROUND IMAGE UPLOAD */}
+                <div className="p-3.5 rounded-2xl bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 space-y-2">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 uppercase">
+                    🌌 Fullscreen Practice Background Image (Upload Image File OR Optional URL)
+                  </label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setModalState({ ...modalState, bgImageFile: e.target.files[0] })}
+                    className="w-full px-3 py-1.5 text-xs font-bold rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-emerald-500 file:text-white"
+                  />
+                  <input
+                    type="url"
+                    placeholder="OR enter Fullscreen Background Image URL"
+                    value={modalState.bgImageUrlCustom}
+                    onChange={(e) => setModalState({ ...modalState, bgImageUrlCustom: e.target.value })}
+                    className="w-full px-3.5 py-2 text-xs font-bold rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white"
+                  />
+                </div>
+
                 {/* MANDALA FRAME UPLOAD */}
                 <div className="p-3.5 rounded-2xl bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 space-y-2">
                   <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 uppercase">
@@ -456,6 +499,26 @@ export function ExerciseLibraryPage() {
                     placeholder="OR enter Audio Stream URL"
                     value={modalState.bgMusicUrlCustom}
                     onChange={(e) => setModalState({ ...modalState, bgMusicUrlCustom: e.target.value })}
+                    className="w-full px-3.5 py-2 text-xs font-bold rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white"
+                  />
+                </div>
+
+                {/* VOICE GUIDANCE AUDIO UPLOAD */}
+                <div className="p-3.5 rounded-2xl bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 space-y-2">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 uppercase">
+                    🎙️ Voice Guidance Audio Track (Upload Audio File OR Optional URL)
+                  </label>
+                  <input
+                    type="file"
+                    accept="audio/*"
+                    onChange={(e) => setModalState({ ...modalState, voiceGuidanceFile: e.target.files[0] })}
+                    className="w-full px-3 py-1.5 text-xs font-bold rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-emerald-500 file:text-white"
+                  />
+                  <input
+                    type="url"
+                    placeholder="OR enter Voice Guidance Audio URL"
+                    value={modalState.voiceGuidanceUrlCustom}
+                    onChange={(e) => setModalState({ ...modalState, voiceGuidanceUrlCustom: e.target.value })}
                     className="w-full px-3.5 py-2 text-xs font-bold rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white"
                   />
                 </div>
