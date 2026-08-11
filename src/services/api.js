@@ -623,6 +623,36 @@ export const api = {
   },
 
   // Daily Schedule & Calendar API
+  async getCalendarCategories() {
+    const data = await request('/daily-schedule/categories');
+    if (data && data.success) return data.data;
+    return [];
+  },
+
+  async saveCalendarCategory(payload) {
+    if (payload instanceof FormData) {
+      const primaryUrl = API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL;
+      const secondaryUrl = LIVE_API_URL.endsWith('/') ? LIVE_API_URL.slice(0, -1) : LIVE_API_URL;
+      for (const baseUrl of [primaryUrl, secondaryUrl]) {
+        try {
+          const res = await fetch(`${baseUrl}/daily-schedule/categories`, { method: 'POST', body: payload });
+          if (res.ok) {
+            const data = await res.json();
+            return data.data;
+          }
+        } catch (e) {}
+      }
+      return null;
+    }
+    const data = await request('/daily-schedule/categories', { method: 'POST', body: JSON.stringify(payload) });
+    if (data && data.success) return data.data;
+    return null;
+  },
+
+  async deleteCalendarCategory(id) {
+    return await request(`/daily-schedule/categories/${id}`, { method: 'DELETE' });
+  },
+
   async getDailySchedulesByDate(dateStr = '') {
     const q = dateStr ? `?date=${dateStr}` : '';
     const data = await request(`/daily-schedule${q}`);

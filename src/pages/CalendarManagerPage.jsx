@@ -13,6 +13,7 @@ import {
   Clock,
   Upload,
   Music,
+  Volume2,
   Image as ImageIcon,
   CheckCircle2,
   Sparkles,
@@ -23,69 +24,89 @@ import {
 export function CalendarManagerPage() {
   const { showToast } = useApp();
 
-  const [schedules, setSchedules] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const [formModal, setFormModal] = useState({
     open: false,
     isEdit: false,
     id: null,
-    title: '',
-    category: 'Breathing',
-    scheduledDate: new Date().toISOString().split('T')[0],
-    scheduledTime: '07:00 AM',
-    durationMinutes: 10,
+    name: 'Breathing',
+    icon: '☀️',
     bgImageUrlCustom: '',
     bgImageFile: null,
     frameDesignUrlCustom: '',
     frameDesignFile: null,
     bgMusicUrlCustom: '',
-    bgMusicFile: null
+    bgMusicFile: null,
+    voiceGuidanceUrlCustom: '',
+    voiceGuidanceFile: null
   });
 
   useEffect(() => {
-    loadSchedules();
+    loadCategories();
   }, []);
 
-  const loadSchedules = async () => {
+  const loadCategories = async () => {
     setIsLoading(true);
-    const res = await api.getDailySchedulesByDate('');
-    if (res && res.data) setSchedules(res.data);
+    const data = await api.getCalendarCategories();
+    if (data) setCategories(data);
     setIsLoading(false);
   };
 
   const handleSave = async (e) => {
     e.preventDefault();
     const formData = new FormData();
-    formData.append('title', formModal.title);
-    formData.append('category', formModal.category);
-    formData.append('scheduledDate', formModal.scheduledDate);
-    formData.append('scheduledTime', formModal.scheduledTime);
-    formData.append('durationMinutes', formModal.durationMinutes);
+    if (formModal.id) formData.append('id', formModal.id);
+    formData.append('name', formModal.name);
+    formData.append('icon', formModal.icon);
     formData.append('bgImageUrlCustom', formModal.bgImageUrlCustom);
     formData.append('frameDesignUrlCustom', formModal.frameDesignUrlCustom);
     formData.append('bgMusicUrlCustom', formModal.bgMusicUrlCustom);
+    formData.append('voiceGuidanceUrlCustom', formModal.voiceGuidanceUrlCustom);
 
     if (formModal.bgImageFile) formData.append('bgImage', formModal.bgImageFile);
     if (formModal.frameDesignFile) formData.append('frameDesign', formModal.frameDesignFile);
     if (formModal.bgMusicFile) formData.append('bgMusic', formModal.bgMusicFile);
+    if (formModal.voiceGuidanceFile) formData.append('voiceGuidance', formModal.voiceGuidanceFile);
 
     try {
-      const created = await api.addDailySchedule(formData);
-      if (created) {
-        setSchedules((prev) => [...prev, created]);
-        showToast(`Calendar Routine "${formModal.title}" created!`, 'success');
+      const saved = await api.saveCalendarCategory(formData);
+      if (saved) {
+        showToast(`Practice Category "${formModal.name}" saved successfully!`, 'success');
+        loadCategories();
         closeForm();
+      } else {
+        showToast('Failed to save category assets', 'error');
       }
     } catch (err) {
-      showToast(err.message, 'error');
+      showToast(err.message || 'Error saving category', 'error');
     }
   };
 
-  const handleDelete = async (id, title) => {
-    await api.deleteDailySchedule(id);
-    setSchedules((prev) => prev.filter((s) => s._id !== id && s.id !== id));
-    showToast(`Routine "${title}" deleted from calendar`, 'info');
+  const handleDelete = async (id, name) => {
+    if (!window.confirm(`Are you sure you want to delete category "${name}"?`)) return;
+    await api.deleteCalendarCategory(id);
+    setCategories((prev) => prev.filter((c) => (c._id || c.id) !== id));
+    showToast(`Category "${name}" deleted`, 'info');
+  };
+
+  const handleEdit = (cat) => {
+    setFormModal({
+      open: true,
+      isEdit: true,
+      id: cat._id || cat.id,
+      name: cat.name || 'Breathing',
+      icon: cat.icon || '☀️',
+      bgImageUrlCustom: cat.bgImageUrl || '',
+      bgImageFile: null,
+      frameDesignUrlCustom: cat.frameDesignUrl || '',
+      frameDesignFile: null,
+      bgMusicUrlCustom: cat.bgMusicUrl || '',
+      bgMusicFile: null,
+      voiceGuidanceUrlCustom: cat.voiceGuidanceUrl || '',
+      voiceGuidanceFile: null
+    });
   };
 
   const closeForm = () => {
@@ -93,17 +114,16 @@ export function CalendarManagerPage() {
       open: false,
       isEdit: false,
       id: null,
-      title: '',
-      category: 'Breathing',
-      scheduledDate: new Date().toISOString().split('T')[0],
-      scheduledTime: '07:00 AM',
-      durationMinutes: 10,
+      name: 'Breathing',
+      icon: '☀️',
       bgImageUrlCustom: '',
       bgImageFile: null,
       frameDesignUrlCustom: '',
       frameDesignFile: null,
       bgMusicUrlCustom: '',
-      bgMusicFile: null
+      bgMusicFile: null,
+      voiceGuidanceUrlCustom: '',
+      voiceGuidanceFile: null
     });
   };
 
@@ -114,74 +134,108 @@ export function CalendarManagerPage() {
         <div>
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-xs font-bold text-emerald-500 mb-2">
             <Calendar className="w-3.5 h-3.5" />
-            <span>Calendar & Daily Wellness Schedule Suite</span>
+            <span>Calendar & Practice Routine Categories Suite</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-            Calendar & Schedule Management
+            Calendar Practice Categories & Media Management
           </h1>
           <p className="text-xs sm:text-sm font-medium text-slate-500 dark:text-slate-400 mt-1">
-            Configure User Calendar Routines (Breathing, Yoga, Meditation, Relaxation, Sleep), Mandala Frames, Background Imagery, and Music Streams.
+            Configure User Calendar Practice Categories (Breathing, Yoga, Meditation, Relaxation, Sleep), Mandala Frames, Background Nature Images, and Ambient Audio.
           </p>
         </div>
 
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" icon={RefreshCw} onClick={loadSchedules}>
+          <Button variant="outline" size="sm" icon={RefreshCw} onClick={loadCategories}>
             Sync Database
+          </Button>
+          <Button variant="primary" size="sm" icon={Plus} onClick={() => setFormModal({ ...formModal, open: true })}>
+            Add Category
           </Button>
         </div>
       </div>
 
-      {/* Schedules Grid */}
+      {/* Categories Grid */}
       <Card>
         <CardHeader
           actions={
             <Button variant="primary" size="sm" icon={Plus} onClick={() => setFormModal({ ...formModal, open: true })}>
-              Add Routine
+              Add Practice Category
             </Button>
           }
         >
-          <CardTitle subtitle="Manage Calendar Routines & Audio/Visual Assets">
-            Configured Daily Schedules ({schedules.length})
+          <CardTitle subtitle="Manage Practice Categories & Audio/Visual Media Assets">
+            Configured Practice Categories ({categories.length})
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {schedules.map((item) => (
-              <div key={item._id || item.id} className="p-5 rounded-2xl bg-slate-100/90 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 space-y-4 shadow-xs group hover:border-emerald-500/40 transition-all">
-                <div className="relative aspect-video rounded-xl bg-slate-900 overflow-hidden">
-                  <img src={item.bgImageUrl || 'https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?q=80&w=1200&auto=format&fit=crop'} alt={item.title} className="w-full h-full object-cover opacity-85" />
-                  <Badge variant="emerald" className="absolute top-2 left-2">
-                    {item.category}
-                  </Badge>
-                  <span className="absolute bottom-2 right-2 px-2.5 py-1 rounded-full bg-black/70 backdrop-blur-md text-white text-xs font-mono font-bold">
-                    {item.scheduledTime} ({item.durationMinutes}m)
-                  </span>
-                </div>
+          {isLoading ? (
+            <div className="py-12 text-center text-sm font-medium text-slate-400">Loading categories...</div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {categories.map((item) => (
+                <div key={item._id || item.id} className="p-5 rounded-2xl bg-slate-100/90 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 space-y-4 shadow-xs group hover:border-emerald-500/40 transition-all">
+                  <div className="relative aspect-video rounded-xl bg-slate-900 overflow-hidden">
+                    <img
+                      src={item.bgImageUrl || 'https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?q=80&w=1200&auto=format&fit=crop'}
+                      alt={item.name}
+                      className="w-full h-full object-cover opacity-85 group-hover:scale-105 transition-transform duration-300"
+                    />
+                    <Badge variant="emerald" className="absolute top-2 left-2 flex items-center gap-1">
+                      <span>{item.icon || '☀️'}</span>
+                      <span>{item.name}</span>
+                    </Badge>
+                  </div>
 
-                <div>
-                  <h4 className="text-base font-extrabold text-slate-900 dark:text-white">{item.title}</h4>
-                  <p className="text-xs text-slate-400 font-medium">Date: <strong className="text-slate-200">{item.scheduledDate}</strong></p>
-                </div>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="text-base font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+                        <span>{item.icon}</span>
+                        <span>{item.name}</span>
+                      </h4>
+                      <p className="text-xs text-slate-400 font-medium mt-0.5">Admin Practice Category</p>
+                    </div>
+                  </div>
 
-                <div className="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 text-xs space-y-1 text-slate-500 font-medium">
-                  <p className="flex items-center justify-between">
-                    <span>Status: <strong className={item.status === 'Completed' ? 'text-emerald-500 font-bold' : 'text-amber-500 font-bold'}>{item.status}</strong></span>
-                    <span className="text-indigo-400">Mandala Frame Uploaded</span>
-                  </p>
-                </div>
+                  <div className="p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 text-xs space-y-1.5 text-slate-500 font-medium">
+                    <p className="flex items-center justify-between">
+                      <span className="flex items-center gap-1.5 text-indigo-500 font-bold">
+                        <ImageIcon className="w-3.5 h-3.5" />
+                        Background Image
+                      </span>
+                      <span className="text-emerald-500 font-bold">Configured</span>
+                    </p>
+                    <p className="flex items-center justify-between">
+                      <span className="flex items-center gap-1.5 text-amber-500 font-bold">
+                        <Flower2 className="w-3.5 h-3.5" />
+                        Mandala Ring Frame
+                      </span>
+                      <span className="text-emerald-500 font-bold">Configured</span>
+                    </p>
+                    <p className="flex items-center justify-between">
+                      <span className="flex items-center gap-1.5 text-cyan-500 font-bold">
+                        <Music className="w-3.5 h-3.5" />
+                        Ambient Audio Music
+                      </span>
+                      <span className="text-emerald-500 font-bold">Configured</span>
+                    </p>
+                  </div>
 
-                <div className="flex items-center justify-between pt-1">
-                  <Button variant="danger" size="sm" icon={Trash2} onClick={() => handleDelete(item._id || item.id, item.title)}>
-                    Delete
-                  </Button>
+                  <div className="flex items-center justify-between pt-1 gap-2">
+                    <Button variant="outline" size="sm" icon={Edit2} onClick={() => handleEdit(item)}>
+                      Edit Category
+                    </Button>
+                    <Button variant="danger" size="sm" icon={Trash2} onClick={() => handleDelete(item._id || item.id, item.name)}>
+                      Delete
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
 
-      {/* FORM MODAL */}
+      {/* FORM MODAL - ADD / EDIT CATEGORY */}
       {formModal.open && (
         <div
           onClick={closeForm}
@@ -201,40 +255,39 @@ export function CalendarManagerPage() {
 
             <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2 pr-8">
               <Calendar className="w-5 h-5 text-emerald-500" />
-              Add Practice Routine to Calendar
+              {formModal.isEdit ? 'Edit Practice Category' : 'Add Practice Category to Calendar'}
             </h3>
-            <form onSubmit={handleSave} className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Routine Title</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Sleep Journey Practice"
-                  value={formModal.title}
-                  onChange={(e) => setFormModal({ ...formModal, title: e.target.value })}
-                  className="w-full px-4 py-2.5 text-xs font-bold rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
-                />
-              </div>
 
-              <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Category</label>
-                <select
-                  value={formModal.category}
-                  onChange={(e) => setFormModal({ ...formModal, category: e.target.value })}
-                  className="w-full px-4 py-2.5 text-xs font-bold rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
-                >
-                  <option value="Breathing">Breathing</option>
-                  <option value="Yoga">Yoga</option>
-                  <option value="Meditation">Meditation</option>
-                  <option value="Relaxation">Relaxation</option>
-                  <option value="Sleep">Sleep</option>
-                </select>
+            <form onSubmit={handleSave} className="space-y-4">
+              <div className="grid grid-cols-3 gap-3">
+                <div className="col-span-2">
+                  <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Category Name</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Breathing, Yoga, Sleep"
+                    value={formModal.name}
+                    onChange={(e) => setFormModal({ ...formModal, name: e.target.value })}
+                    className="w-full px-4 py-2.5 text-xs font-bold rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Icon / Emoji</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. ☀️, 🧘, 😴"
+                    value={formModal.icon}
+                    onChange={(e) => setFormModal({ ...formModal, icon: e.target.value })}
+                    className="w-full px-4 py-2.5 text-xs font-bold rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-center text-lg"
+                  />
+                </div>
               </div>
 
               {/* Background Nature Image Upload + Optional URL */}
-              <div className="p-3 rounded-2xl bg-slate-100/70 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 space-y-2">
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase">
-                  Background Nature Image (Upload File OR Optional URL)
+              <div className="p-3.5 rounded-2xl bg-slate-100/70 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 space-y-2">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase flex items-center gap-1.5">
+                  <ImageIcon className="w-3.5 h-3.5 text-indigo-500" />
+                  <span>Background Nature Image (Upload File OR Optional URL)</span>
                 </label>
                 <input
                   type="file"
@@ -252,9 +305,10 @@ export function CalendarManagerPage() {
               </div>
 
               {/* Mandala Decorative Frame Design Upload + Optional URL */}
-              <div className="p-3 rounded-2xl bg-slate-100/70 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 space-y-2">
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase">
-                  Mandala Decorative Frame Ring (Upload File OR Optional URL)
+              <div className="p-3.5 rounded-2xl bg-slate-100/70 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 space-y-2">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase flex items-center gap-1.5">
+                  <Flower2 className="w-3.5 h-3.5 text-amber-500" />
+                  <span>Mandala Decorative Frame Ring (Upload File OR Optional URL)</span>
                 </label>
                 <input
                   type="file"
@@ -272,9 +326,10 @@ export function CalendarManagerPage() {
               </div>
 
               {/* Background Music Audio Upload + Optional URL */}
-              <div className="p-3 rounded-2xl bg-slate-100/70 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 space-y-2">
-                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase">
-                  Background Ambient Music (Upload Audio File OR Optional URL)
+              <div className="p-3.5 rounded-2xl bg-slate-100/70 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 space-y-2">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase flex items-center gap-1.5">
+                  <Music className="w-3.5 h-3.5 text-cyan-500" />
+                  <span>Background Ambient Music (Upload Audio File OR Optional URL)</span>
                 </label>
                 <input
                   type="file"
@@ -291,12 +346,33 @@ export function CalendarManagerPage() {
                 />
               </div>
 
+              {/* Voice Guidance Audio Upload + Optional URL */}
+              <div className="p-3.5 rounded-2xl bg-slate-100/70 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 space-y-2">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase flex items-center gap-1.5">
+                  <Volume2 className="w-3.5 h-3.5 text-emerald-500" />
+                  <span>Voice Guidance Audio (Upload Audio File OR Optional URL)</span>
+                </label>
+                <input
+                  type="file"
+                  accept="audio/*"
+                  onChange={(e) => setFormModal({ ...formModal, voiceGuidanceFile: e.target.files[0] })}
+                  className="w-full px-3 py-1.5 text-xs font-bold rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-emerald-500 file:text-white"
+                />
+                <input
+                  type="url"
+                  placeholder="OR enter Voice Guidance Audio URL"
+                  value={formModal.voiceGuidanceUrlCustom}
+                  onChange={(e) => setFormModal({ ...formModal, voiceGuidanceUrlCustom: e.target.value })}
+                  className="w-full px-3.5 py-2 text-xs font-bold rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white"
+                />
+              </div>
+
               <div className="flex items-center justify-end gap-2 pt-2">
                 <Button variant="ghost" type="button" onClick={closeForm}>
                   Cancel
                 </Button>
                 <Button variant="primary" type="submit" icon={Upload}>
-                  Save Routine
+                  Save Category Assets
                 </Button>
               </div>
             </form>
