@@ -18,6 +18,32 @@ export function StoreManagerPage() {
   const [coupons, setCoupons] = useState([]);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [uploadingImage, setUploadingImage] = useState(false);
+
+  const handleFileUpload = async (file, onSuccess) => {
+    if (!file) return;
+    setUploadingImage(true);
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+
+      const res = await fetch(`${API_BASE_URL}/store/upload`, {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+      if (data.success && data.url) {
+        onSuccess(data.url);
+        showToast('Image uploaded successfully via Cloudinary / Local storage!', 'success');
+      } else {
+        showToast(data.message || 'Failed to upload image', 'danger');
+      }
+    } catch (err) {
+      showToast('Error uploading image file', 'danger');
+    } finally {
+      setUploadingImage(false);
+    }
+  };
 
   // Filters & Search
   const [searchTerm, setSearchTerm] = useState('');
@@ -971,14 +997,39 @@ export function StoreManagerPage() {
               </div>
 
               <div>
-                <label className="block text-[11px] font-extrabold uppercase text-slate-400 mb-1">Product Image URL</label>
-                <input
-                  type="text"
-                  value={productForm.images[0] || ''}
-                  onChange={(e) => setProductForm({ ...productForm, images: [e.target.value] })}
-                  placeholder="https://images.unsplash.com/photo-1545205597-3d9d02c29597"
-                  className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
-                />
+                <label className="block text-[11px] font-extrabold uppercase text-slate-400 mb-1">Product Image (URL or Local Device Upload)</label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={productForm.images[0] || ''}
+                    onChange={(e) => setProductForm({ ...productForm, images: [e.target.value] })}
+                    placeholder="https://images.unsplash.com/... or upload local file"
+                    className="flex-1 px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
+                  />
+                  <label className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold cursor-pointer text-xs flex items-center gap-1.5 shrink-0 transition-colors shadow-xs">
+                    <ImageIcon className="w-4 h-4" />
+                    <span>{uploadingImage ? 'Uploading...' : '📁 Upload Local File'}</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      disabled={uploadingImage}
+                      onChange={(e) => {
+                        if (e.target.files?.[0]) {
+                          handleFileUpload(e.target.files[0], (url) => setProductForm(prev => ({ ...prev, images: [url] })));
+                        }
+                      }}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+                {productForm.images[0] && (
+                  <div className="mt-2 flex items-center gap-2">
+                    <div className="w-12 h-12 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 shrink-0">
+                      <img src={productForm.images[0]} alt="Product preview" className="w-full h-full object-cover" />
+                    </div>
+                    <span className="text-[11px] text-emerald-600 font-bold">✓ Ready</span>
+                  </div>
+                )}
               </div>
 
               <div>
@@ -1094,14 +1145,39 @@ export function StoreManagerPage() {
               </div>
 
               <div>
-                <label className="block text-[11px] font-extrabold uppercase text-slate-400 mb-1">Image URL</label>
-                <input
-                  type="text"
-                  value={categoryForm.imageUrl}
-                  onChange={(e) => setCategoryForm({ ...categoryForm, imageUrl: e.target.value })}
-                  placeholder="https://images.unsplash.com/photo-..."
-                  className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
-                />
+                <label className="block text-[11px] font-extrabold uppercase text-slate-400 mb-1">Category Image (URL or Local Device Upload)</label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={categoryForm.imageUrl}
+                    onChange={(e) => setCategoryForm({ ...categoryForm, imageUrl: e.target.value })}
+                    placeholder="https://images.unsplash.com/... or upload local file"
+                    className="flex-1 px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
+                  />
+                  <label className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold cursor-pointer text-xs flex items-center gap-1.5 shrink-0 transition-colors shadow-xs">
+                    <ImageIcon className="w-4 h-4" />
+                    <span>{uploadingImage ? 'Uploading...' : '📁 Upload Local File'}</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      disabled={uploadingImage}
+                      onChange={(e) => {
+                        if (e.target.files?.[0]) {
+                          handleFileUpload(e.target.files[0], (url) => setCategoryForm(prev => ({ ...prev, imageUrl: url })));
+                        }
+                      }}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+                {categoryForm.imageUrl && (
+                  <div className="mt-2 flex items-center gap-2">
+                    <div className="w-12 h-12 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 shrink-0">
+                      <img src={categoryForm.imageUrl} alt="Category preview" className="w-full h-full object-cover" />
+                    </div>
+                    <span className="text-[11px] text-emerald-600 font-bold">✓ Ready</span>
+                  </div>
+                )}
               </div>
 
               <div className="flex justify-end gap-3 pt-3 border-t border-slate-200 dark:border-slate-800">
