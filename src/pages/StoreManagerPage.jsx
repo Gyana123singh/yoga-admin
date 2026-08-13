@@ -166,6 +166,15 @@ export function StoreManagerPage() {
   const handleOpenProductModal = (product = null) => {
     if (product) {
       setEditingProduct(product);
+      let initialGallery = [];
+      if (product.imageGallery && Array.isArray(product.imageGallery) && product.imageGallery.length > 0) {
+        initialGallery = product.imageGallery.map(img => 
+          typeof img === 'string' ? { url: img, isActive: true } : { url: img.url, isActive: img.isActive !== false }
+        );
+      } else if (product.images && Array.isArray(product.images) && product.images.length > 0) {
+        initialGallery = product.images.map(url => ({ url: typeof url === 'string' ? url : url.url, isActive: true }));
+      }
+
       setProductForm({
         name: product.name || '',
         subtitle: product.subtitle || '',
@@ -175,6 +184,7 @@ export function StoreManagerPage() {
         mrp: product.mrp || '',
         badgeTag: product.badgeTag || '',
         images: product.images?.length ? product.images : [''],
+        imageGallery: initialGallery,
         material: product.material || 'Cotton',
         tech: product.tech || 'Bio Wash',
         colorsText: product.colors?.map(c => `${c.name}|${c.hexCode}`).join(', ') || 'Black|#1E1E1E, Olive Green|#3B4E32',
@@ -200,6 +210,9 @@ export function StoreManagerPage() {
         mrp: '',
         badgeTag: 'BESTSELLER',
         images: ['https://images.unsplash.com/photo-1545205597-3d9d02c29597?q=80&w=800'],
+        imageGallery: [
+          { url: 'https://images.unsplash.com/photo-1545205597-3d9d02c29597?q=80&w=800', isActive: true }
+        ],
         material: 'Cotton',
         tech: 'Bio Wash',
         colorsText: 'Black|#1E1E1E, Olive Green|#3B4E32',
@@ -227,6 +240,9 @@ export function StoreManagerPage() {
       });
 
       const selectedCatId = productForm.category || (categories.length > 0 ? categories[0]._id : undefined);
+      const activeGalleryUrls = (productForm.imageGallery || [])
+        .filter(img => img.isActive !== false)
+        .map(img => img.url);
 
       const payload = {
         ...productForm,
@@ -236,7 +252,8 @@ export function StoreManagerPage() {
         couponDiscountPrice: productForm.couponDiscountPrice ? Number(productForm.couponDiscountPrice) : undefined,
         stockCount: Number(productForm.stockCount),
         colors: colorsParsed,
-        images: productForm.images.filter(img => img.trim() !== '')
+        imageGallery: productForm.imageGallery || [],
+        images: activeGalleryUrls.length > 0 ? activeGalleryUrls : productForm.images
       };
 
       const url = editingProduct 
@@ -997,37 +1014,128 @@ export function StoreManagerPage() {
               </div>
 
               <div>
-                <label className="block text-[11px] font-extrabold uppercase text-slate-400 mb-1">Product Image (URL or Local Device Upload)</label>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-[11px] font-extrabold uppercase text-slate-400">
+                    Product Image Gallery & Side Review ({productForm.imageGallery?.filter(i => i.isActive !== false).length || 0} Active / {productForm.imageGallery?.length || 0} Total)
+                  </label>
+                  <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-md border border-emerald-200 dark:border-emerald-800">
+                    {productForm.imageGallery?.filter(i => i.isActive !== false).length || 0} images will show to customer
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2 mb-3">
                   <input
                     type="text"
-                    value={productForm.images[0] || ''}
-                    onChange={(e) => setProductForm({ ...productForm, images: [e.target.value] })}
-                    placeholder="https://images.unsplash.com/... or upload local file"
-                    className="flex-1 px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
+                    id="newGalleryUrlInput"
+                    placeholder="Paste Image URL or upload local file"
+                    className="flex-1 px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-xs"
                   />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const input = document.getElementById('newGalleryUrlInput');
+                      if (input && input.value.trim()) {
+                        const newUrl = input.value.trim();
+                        const newGallery = [...(productForm.imageGallery || []), { url: newUrl, isActive: true }];
+                        const activeUrls = newGallery.filter(i => i.isActive !== false).map(i => i.url);
+                        setProductForm({ ...productForm, imageGallery: newGallery, images: activeUrls });
+                        input.value = '';
+                        showToast('Image added to gallery!', 'success');
+                      }
+                    }}
+                    className="px-3.5 py-2 rounded-xl bg-slate-800 dark:bg-slate-700 hover:bg-slate-900 text-white font-bold text-xs shrink-0 transition-colors"
+                  >
+                    + Add URL
+                  </button>
                   <label className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold cursor-pointer text-xs flex items-center gap-1.5 shrink-0 transition-colors shadow-xs">
                     <ImageIcon className="w-4 h-4" />
-                    <span>{uploadingImage ? 'Uploading...' : '📁 Upload Local File'}</span>
+                    <span>{uploadingImage ? 'Uploading...' : '📁 Upload Local'}</span>
                     <input
                       type="file"
                       accept="image/*"
+                      multiple
                       disabled={uploadingImage}
                       onChange={(e) => {
-                        if (e.target.files?.[0]) {
-                          handleFileUpload(e.target.files[0], (url) => setProductForm(prev => ({ ...prev, images: [url] })));
+                        if (e.target.files && e.target.files.length > 0) {
+                          Array.from(e.target.files).forEach(file => {
+                            handleFileUpload(file, (url) => {
+                              setProductForm(prev => {
+                                const updatedGallery = [...(prev.imageGallery || []), { url, isActive: true }];
+                                const updatedActive = updatedGallery.filter(i => i.isActive !== false).map(i => i.url);
+                                return { ...prev, imageGallery: updatedGallery, images: updatedActive };
+                              });
+                            });
+                          });
                         }
                       }}
                       className="hidden"
                     />
                   </label>
                 </div>
-                {productForm.images[0] && (
-                  <div className="mt-2 flex items-center gap-2">
-                    <div className="w-12 h-12 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 shrink-0">
-                      <img src={productForm.images[0]} alt="Product preview" className="w-full h-full object-cover" />
-                    </div>
-                    <span className="text-[11px] text-emerald-600 font-bold">✓ Ready</span>
+
+                {/* Gallery Cards Grid */}
+                {productForm.imageGallery && productForm.imageGallery.length > 0 ? (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 max-h-56 overflow-y-auto p-1.5 bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-slate-200/80 dark:border-slate-800">
+                    {productForm.imageGallery.map((img, idx) => (
+                      <div
+                        key={idx}
+                        className={`relative rounded-xl overflow-hidden border p-1.5 flex flex-col justify-between transition-all ${
+                          img.isActive !== false
+                            ? 'bg-white dark:bg-slate-900 border-emerald-500/50 shadow-xs ring-1 ring-emerald-500/20' 
+                            : 'bg-slate-100 dark:bg-slate-900/40 border-slate-300 dark:border-slate-800 opacity-60'
+                        }`}
+                      >
+                        <div className="relative h-24 w-full rounded-lg overflow-hidden bg-slate-200 dark:bg-slate-800 mb-1.5">
+                          <img src={img.url} alt={`Gallery ${idx + 1}`} className="w-full h-full object-cover" />
+                          <span className={`absolute top-1 left-1 px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase ${
+                            img.isActive !== false ? 'bg-emerald-600 text-white' : 'bg-slate-600 text-slate-200'
+                          }`}>
+                            {img.isActive !== false ? '🟢 Active' : '⚪ Inactive'}
+                          </span>
+                          {idx === 0 && (
+                            <span className="absolute top-1 right-1 px-1.5 py-0.5 rounded-md bg-amber-500 text-white text-[9px] font-black uppercase shadow-xs">
+                              ⭐ Cover
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="flex items-center justify-between gap-1 pt-1 border-t border-slate-100 dark:border-slate-800">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const updatedGallery = productForm.imageGallery.map((item, i) => 
+                                i === idx ? { ...item, isActive: !(item.isActive !== false) } : item
+                              );
+                              const activeUrls = updatedGallery.filter(i => i.isActive !== false).map(i => i.url);
+                              setProductForm({ ...productForm, imageGallery: updatedGallery, images: activeUrls });
+                            }}
+                            className={`flex-1 py-1 rounded-lg text-[10px] font-bold transition-colors ${
+                              img.isActive !== false 
+                                ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 hover:bg-amber-200' 
+                                : 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 hover:bg-emerald-200'
+                            }`}
+                          >
+                            {img.isActive !== false ? 'Set Inactive' : 'Set Active'}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const updatedGallery = productForm.imageGallery.filter((_, i) => i !== idx);
+                              const activeUrls = updatedGallery.filter(i => i.isActive !== false).map(i => i.url);
+                              setProductForm({ ...productForm, imageGallery: updatedGallery, images: activeUrls });
+                            }}
+                            className="p-1 rounded-lg bg-rose-50 dark:bg-rose-950/60 text-rose-600 hover:bg-rose-100 transition-colors"
+                            title="Remove image"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="p-3 text-center rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-dashed border-slate-300 dark:border-slate-700 text-slate-400 text-xs">
+                    No images added yet. Paste a URL or click "Upload Local" above to add product review images.
                   </div>
                 )}
               </div>
