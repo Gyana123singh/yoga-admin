@@ -47,9 +47,11 @@ export function StoreManagerPage() {
     tech: 'Bio Wash',
     colorsText: 'Black|#1E1E1E, Olive Green|#3B4E32',
     sizes: ['S', 'M', 'L', 'XL', 'XXL'],
-    stockCount: 50,
+    stockCount: 10,
     rating: 4.5,
     reviewCount: 12,
+    materialsCare: '100% Premium Bio-Washed Cotton. Machine wash cold with like colors. Tumble dry low or line dry in shade. Do not bleach or dry clean.',
+    additionalInfo: 'Country of Origin: India. Net Quantity: 1 N. Manufactured & Packed by YogaPrana Wellness Pvt. Ltd.',
     applicableCoupon: 'YOGA10',
     couponDiscountPrice: '',
     isFeatured: true,
@@ -70,7 +72,6 @@ export function StoreManagerPage() {
   // Coupon Form State
   const [couponForm, setCouponForm] = useState({
     code: '',
-    description: '',
     discountType: 'percentage',
     discountValue: 10,
     minOrderAmount: 0,
@@ -150,11 +151,13 @@ export function StoreManagerPage() {
         images: product.images?.length ? product.images : [''],
         material: product.material || 'Cotton',
         tech: product.tech || 'Bio Wash',
-        colorsText: product.colors?.map(c => `${c.name}|${c.hexCode}`).join(', ') || '',
+        colorsText: product.colors?.map(c => `${c.name}|${c.hexCode}`).join(', ') || 'Black|#1E1E1E, Olive Green|#3B4E32',
         sizes: product.sizes || ['S', 'M', 'L', 'XL', 'XXL'],
-        stockCount: product.stockCount ?? 50,
+        stockCount: product.stockCount ?? 10,
         rating: product.rating || 4.5,
         reviewCount: product.reviewCount || 12,
+        materialsCare: product.materialsCare || '100% Premium Bio-Washed Cotton. Machine wash cold with like colors.',
+        additionalInfo: product.additionalInfo || 'Country of Origin: India. Net Quantity: 1 N.',
         applicableCoupon: product.applicableCoupon || 'YOGA10',
         couponDiscountPrice: product.couponDiscountPrice || '',
         isFeatured: product.isFeatured ?? true,
@@ -178,6 +181,8 @@ export function StoreManagerPage() {
         stockCount: 10,
         rating: 4.5,
         reviewCount: 15,
+        materialsCare: '100% Premium Bio-Washed Cotton. Machine wash cold with like colors. Tumble dry low or line dry in shade.',
+        additionalInfo: 'Country of Origin: India. Net Quantity: 1 N. Manufactured & Packed by YogaPrana Wellness Pvt. Ltd.',
         applicableCoupon: 'YOGA10',
         couponDiscountPrice: '',
         isFeatured: true,
@@ -789,18 +794,18 @@ export function StoreManagerPage() {
       {/* ADD / EDIT PRODUCT MODAL                                             */}
       {/* ==================================================================== */}
       {isProductModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm overflow-y-auto">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 w-full max-w-2xl shadow-2xl space-y-4 my-8">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/75 backdrop-blur-md p-4 flex justify-center items-start pt-10 sm:pt-14">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 w-full max-w-2xl shadow-2xl max-h-[85vh] flex flex-col my-auto">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800 shrink-0">
               <h3 className="text-lg font-black text-slate-900 dark:text-white">
                 {editingProduct ? 'Edit Product' : 'Add New Store Product'}
               </h3>
-              <button onClick={() => setIsProductModalOpen(false)} className="text-slate-400 hover:text-slate-600">
+              <button onClick={() => setIsProductModalOpen(false)} className="p-1 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleSaveProduct} className="space-y-4 text-xs">
+            <form onSubmit={handleSaveProduct} className="space-y-4 text-xs overflow-y-auto flex-1 pr-1 pt-3 font-sans">
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-[11px] font-extrabold uppercase text-slate-400 mb-1">Product Title</label>
@@ -926,6 +931,35 @@ export function StoreManagerPage() {
               </div>
 
               <div>
+                <label className="block text-[11px] font-extrabold uppercase text-slate-400 mb-1">Available Sizes</label>
+                <div className="flex items-center gap-2">
+                  {['S', 'M', 'L', 'XL', 'XXL'].map((sz) => {
+                    const isSelected = productForm.sizes?.includes(sz);
+                    return (
+                      <button
+                        key={sz}
+                        type="button"
+                        onClick={() => {
+                          const currentSizes = productForm.sizes || [];
+                          const updated = isSelected 
+                            ? currentSizes.filter(s => s !== sz) 
+                            : [...currentSizes, sz];
+                          setProductForm({ ...productForm, sizes: updated });
+                        }}
+                        className={`px-3 py-1.5 rounded-xl border text-xs font-black transition-all ${
+                          isSelected 
+                            ? 'bg-emerald-600 border-emerald-600 text-white shadow-xs' 
+                            : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-500'
+                        }`}
+                      >
+                        {sz}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div>
                 <label className="block text-[11px] font-extrabold uppercase text-slate-400 mb-1">Colors (Name|HexCode separated by commas)</label>
                 <input
                   type="text"
@@ -944,6 +978,39 @@ export function StoreManagerPage() {
                   onChange={(e) => setProductForm({ ...productForm, images: [e.target.value] })}
                   placeholder="https://images.unsplash.com/photo-1545205597-3d9d02c29597"
                   className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-extrabold uppercase text-slate-400 mb-1">Product Description</label>
+                <textarea
+                  rows="2"
+                  value={productForm.description}
+                  onChange={(e) => setProductForm({ ...productForm, description: e.target.value })}
+                  placeholder="Designed for intensive yoga sessions and hot pranayama practice..."
+                  className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-xs"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-extrabold uppercase text-slate-400 mb-1">Materials & Care Instructions</label>
+                <textarea
+                  rows="2"
+                  value={productForm.materialsCare}
+                  onChange={(e) => setProductForm({ ...productForm, materialsCare: e.target.value })}
+                  placeholder="100% Premium Bio-Washed Cotton. Machine wash cold..."
+                  className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-xs"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-extrabold uppercase text-slate-400 mb-1">Additional Information</label>
+                <textarea
+                  rows="2"
+                  value={productForm.additionalInfo}
+                  onChange={(e) => setProductForm({ ...productForm, additionalInfo: e.target.value })}
+                  placeholder="Country of Origin: India. Net Quantity: 1 N."
+                  className="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white text-xs"
                 />
               </div>
 
@@ -969,18 +1036,18 @@ export function StoreManagerPage() {
 
       {/* ADD / EDIT CATEGORY MODAL */}
       {isCategoryModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-sm">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 w-full max-w-md shadow-2xl space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800">
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-950/75 backdrop-blur-md p-4 flex justify-center items-start pt-10 sm:pt-14">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 w-full max-w-md shadow-2xl my-auto max-h-[85vh] flex flex-col">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-slate-800 shrink-0">
               <h3 className="text-lg font-black text-slate-900 dark:text-white">
                 {editingCategory ? 'Edit Category' : 'Add Category'}
               </h3>
-              <button onClick={() => setIsCategoryModalOpen(false)} className="text-slate-400">
+              <button onClick={() => setIsCategoryModalOpen(false)} className="p-1 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleSaveCategory} className="space-y-3 text-xs">
+            <form onSubmit={handleSaveCategory} className="space-y-3 text-xs overflow-y-auto flex-1 pr-1 pt-3 font-sans">
               <div>
                 <label className="block text-[11px] font-extrabold uppercase text-slate-400 mb-1">Category Name</label>
                 <input
