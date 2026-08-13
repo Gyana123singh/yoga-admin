@@ -43,7 +43,8 @@ import {
   Building,
   Heart,
   Lightbulb,
-  LifeBuoy
+  LifeBuoy,
+  ShoppingBag
 } from 'lucide-react';
 
 export const NAVIGATION_SECTIONS = [
@@ -59,6 +60,7 @@ export const NAVIGATION_SECTIONS = [
   {
     title: 'Yoga & Practice Library',
     items: [
+      { id: 'store-manager', label: 'Yoga Kits & Store Manager', icon: ShoppingBag, path: '/store-manager', badge: 'Store', badgeColor: 'bg-amber-500/20 text-amber-400 border-amber-500/30' },
       { id: 'yoga-programs', label: 'Yoga Programs', icon: Flower2, path: '/yoga-programs' },
       { id: 'breathing', label: 'Breathing Library', icon: Wind, path: '/breathing' },
       { id: 'exercises', label: 'Exercises Library', icon: Dumbbell, path: '/exercises' },

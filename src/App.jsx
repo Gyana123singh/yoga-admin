@@ -31,6 +31,7 @@ import { CalendarManagerPage } from './pages/CalendarManagerPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { NotificationBroadcastPage } from './pages/NotificationBroadcastPage';
 import { SupportTicketManagerPage } from './pages/SupportTicketManagerPage';
+import { StoreManagerPage } from './pages/StoreManagerPage';
 import { PlaceholderPage } from './pages/PlaceholderPage';
 
 // Icons for placeholder pages
@@ -93,6 +94,7 @@ function AppContent() {
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/notifications" element={<NotificationBroadcastPage />} />
           <Route path="/support-tickets" element={<SupportTicketManagerPage />} />
+          <Route path="/store-manager" element={<StoreManagerPage />} />
           <Route path="/flow-builder" element={<PlaceholderPage title="Flow Timeline Builder" description="Visual animation, transition timing, and pose duration editor." icon={Sliders} category="Studio Studio" />} />
 
           {/* Catch-all Fallback */}
