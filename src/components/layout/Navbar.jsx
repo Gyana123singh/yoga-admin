@@ -199,7 +199,7 @@ export function Navbar({ isCollapsed, onMobileToggle }) {
               className="flex items-center gap-2 p-1 rounded-xl hover:bg-slate-200/60 dark:hover:bg-slate-800 transition-colors cursor-pointer"
             >
               <img
-                src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150"
+                src={adminUser?.avatar || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150"}
                 alt="Profile"
                 className="w-8 h-8 rounded-lg object-cover ring-2 ring-indigo-500/40"
               />
@@ -208,8 +208,8 @@ export function Navbar({ isCollapsed, onMobileToggle }) {
             {isProfileOpen && (
               <div className="absolute right-0 mt-2 w-56 p-2 rounded-2xl glass-card-light dark:glass-card-dark border border-slate-200 dark:border-slate-800 shadow-2xl z-50 space-y-1">
                 <div className="px-3 py-2 border-b border-slate-200/60 dark:border-slate-800">
-                  <p className="text-xs font-bold text-slate-900 dark:text-white">{adminUser?.name || 'Dr. Sarah Jenkins'}</p>
-                  <p className="text-[10px] text-slate-400">{adminUser?.email || 'sarah.jenkins@aura.io'}</p>
+                  <p className="text-xs font-bold text-slate-900 dark:text-white">{adminUser?.name || 'Yoga Fitness Admin'}</p>
+                  <p className="text-[10px] text-slate-400">{adminUser?.email || 'admin@gmail.com'}</p>
                 </div>
                 <button
                   onClick={() => setIsProfileOpen(false)}

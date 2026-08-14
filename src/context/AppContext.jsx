@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { api } from '../services/api';
 
 const AppContext = createContext();
 
@@ -29,26 +30,51 @@ export function AppProvider({ children }) {
   };
 
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    return localStorage.getItem('aura_admin_logged_in') !== 'false';
+    return localStorage.getItem('aura_admin_logged_in') === 'true' && Boolean(localStorage.getItem('aura_admin_token'));
   });
   const [adminUser, setAdminUser] = useState(() => {
     const saved = localStorage.getItem('aura_admin_user');
-    return saved ? JSON.parse(saved) : { name: 'Dr. Sarah Jenkins', email: 'sarah.jenkins@aura.io', role: 'Super Administrator' };
+    return saved ? JSON.parse(saved) : null;
   });
 
-  const loginAdmin = (userData) => {
+  // Verify stored token with real-time backend API on initial mount
+  useEffect(() => {
+    async function verifySession() {
+      const token = localStorage.getItem('aura_admin_token');
+      if (token && localStorage.getItem('aura_admin_logged_in') === 'true') {
+        const res = await api.checkAdminSession();
+        if (res && res.success && res.data) {
+          setAdminUser(res.data);
+          localStorage.setItem('aura_admin_user', JSON.stringify(res.data));
+        } else if (res && res.success === false) {
+          logoutAdmin(false);
+        }
+      }
+    }
+    verifySession();
+  }, []);
+
+  const loginAdmin = (userData, token) => {
     setIsAuthenticated(true);
     setAdminUser(userData);
     localStorage.setItem('aura_admin_logged_in', 'true');
     localStorage.setItem('aura_admin_user', JSON.stringify(userData));
+    if (token) {
+      localStorage.setItem('aura_admin_token', token);
+    }
   };
 
-  const logoutAdmin = () => {
+  const logoutAdmin = (showNotification = true) => {
     setIsAuthenticated(false);
+    setAdminUser(null);
     localStorage.setItem('aura_admin_logged_in', 'false');
     localStorage.removeItem('aura_admin_user');
-    showToast('Logged out of Admin Portal safely', 'warning');
+    localStorage.removeItem('aura_admin_token');
+    if (showNotification) {
+      showToast('Logged out of Admin Portal safely', 'warning');
+    }
   };
+
 
   return (
     <AppContext.Provider value={{

@@ -100,7 +100,7 @@ export function DashboardPage() {
         <div className="space-y-2 relative z-10 max-w-xl">
           <div className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-[10px] sm:text-xs font-bold text-cyan-200">
             <Sparkles className="w-3.5 h-3.5 text-cyan-300 animate-spin-slow shrink-0" />
-            <span className="truncate">AURA AI Platform Executive Suite</span>
+            <span className="truncate">Yoga Fitness AI Platform Executive Suite</span>
           </div>
           <h1 className="text-xl xs:text-2xl sm:text-4xl font-extrabold tracking-tight">
             Mindful Wellness Intelligence

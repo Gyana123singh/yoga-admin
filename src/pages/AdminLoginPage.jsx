@@ -10,26 +10,33 @@ export function AdminLoginPage() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
+  const [errorMessage, setErrorMessage] = useState('');
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
+    setErrorMessage('');
 
     try {
       const response = await api.adminLogin({ email, password });
       
       if (response && response.success) {
-        loginAdmin(response.data);
+        loginAdmin(response.data, response.token);
         showToast('Welcome back! Admin Portal unlocked.', 'success');
       } else {
         const errorMsg = response?.message || 'Invalid admin credentials or unauthorized account.';
+        setErrorMessage(errorMsg);
         showToast(errorMsg, 'error');
       }
     } catch (err) {
-      showToast('Authentication failed. Please check server connection.', 'error');
+      const msg = 'Authentication failed. Please check server connection.';
+      setErrorMessage(msg);
+      showToast(msg, 'error');
     } finally {
       setIsLoading(false);
     }
   };
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-950 p-4 sm:p-6 relative overflow-hidden font-sans">
@@ -45,7 +52,7 @@ export function AdminLoginPage() {
           </div>
           
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-xs font-bold text-indigo-400">
-            <Sparkles className="w-3.5 h-3.5" /> AURA Admin Portal
+            <Sparkles className="w-3.5 h-3.5" /> Yoga Fitness Admin Portal
           </div>
 
           <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
@@ -58,7 +65,14 @@ export function AdminLoginPage() {
 
         {/* Login Form Card */}
         <div className="glass-card-dark p-6 sm:p-8 rounded-3xl border border-slate-800 shadow-2xl space-y-6">
+          {errorMessage && (
+            <div className="p-3.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-semibold animate-fade-in flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-red-500 animate-ping shrink-0" />
+              {errorMessage}
+            </div>
+          )}
           <form onSubmit={handleSubmit} className="space-y-5">
+
             {/* Email Field */}
             <div className="space-y-2">
               <label className="text-xs font-bold text-slate-300 flex items-center gap-1.5">
@@ -69,7 +83,7 @@ export function AdminLoginPage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@aura.io"
+                placeholder="admin@gmail.com"
                 className="w-full px-4 py-3 rounded-xl bg-slate-900/80 border border-slate-700/80 text-white placeholder-slate-500 focus:outline-none focus:border-indigo-500 text-sm font-semibold transition-all"
               />
             </div>

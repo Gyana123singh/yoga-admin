@@ -15,13 +15,27 @@ export function UsersPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    async function loadUsers() {
-      setIsLoading(true);
+    let isMounted = true;
+    async function loadUsers(showLoader = true) {
+      if (showLoader) setIsLoading(true);
       const data = await api.getUsers(filterPlan);
-      setUsersList(data);
-      setIsLoading(false);
+      if (isMounted && data) {
+        setUsersList(data);
+      }
+      if (showLoader && isMounted) setIsLoading(false);
     }
-    loadUsers();
+
+    loadUsers(true);
+
+    // Auto-sync polling every 4 seconds to instantly capture new Google customer signups
+    const interval = setInterval(() => {
+      loadUsers(false);
+    }, 4000);
+
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
   }, [filterPlan]);
 
   const handleAddMember = async (newMember) => {

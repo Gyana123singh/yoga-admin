@@ -7,7 +7,7 @@ export function Footer() {
       <div className="flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 text-center sm:text-left">
         <div className="flex items-center justify-center sm:justify-start gap-2">
           <Flower2 className="w-4 h-4 text-indigo-500 shrink-0" />
-          <span className="truncate">AURA AI Platform v2.4.0 • Enterprise Edition</span>
+          <span className="truncate">Yoga Fitness Platform v2.4.0 • Enterprise Edition</span>
         </div>
 
         <div className="flex flex-col xs:flex-row items-center gap-2.5 sm:gap-4">

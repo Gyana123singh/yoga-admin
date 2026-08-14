@@ -23,14 +23,18 @@ async function request(endpoint, options = {}) {
 
   const targetUrls = [primaryUrl, secondaryUrl];
 
+  const adminToken = localStorage.getItem('aura_admin_token');
+  const authHeaders = adminToken ? { 'Authorization': `Bearer ${adminToken}` } : {};
+
   for (const baseUrl of targetUrls) {
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 3500); // 3.5s timeout per attempt
+      const timeoutId = setTimeout(() => controller.abort(), 4000); // 4s timeout per attempt
 
       const res = await fetch(`${baseUrl}${endpoint}`, {
         headers: {
           'Content-Type': 'application/json',
+          ...authHeaders,
           ...options.headers,
         },
         signal: controller.signal,
@@ -39,8 +43,14 @@ async function request(endpoint, options = {}) {
 
       clearTimeout(timeoutId);
 
+      const json = await res.json().catch(() => null);
       if (res.ok) {
-        return await res.json();
+        return json;
+      }
+
+      // If server responded with 400/401/403, return json error response payload directly
+      if (res.status >= 400 && res.status < 500 && json) {
+        return json;
       }
     } catch (err) {
       console.warn(`[API Auto-Failover] ${baseUrl}${endpoint} failed (${err.message}). Retrying on live server...`);
@@ -61,9 +71,16 @@ export const api = {
       method: 'POST',
       body: JSON.stringify(credentials)
     });
-    if (data && data.success) return data;
-    return null;
+    return data;
   },
+
+  async checkAdminSession() {
+    const data = await request('/auth/admin-me', {
+      method: 'GET'
+    });
+    return data;
+  },
+
 
   // Dashboard API
   async getDashboardStats() {
@@ -86,7 +103,8 @@ export const api = {
     const query = planType !== 'All' ? `?planType=${planType}` : '';
     const data = await request(`/users${query}`);
     if (data && data.success) return data.data;
-    return planType === 'All' ? MOCK_USERS : MOCK_USERS.filter(u => u.planType === planType);
+    const validMocks = MOCK_USERS.filter(u => u.authProvider !== 'admin' && u.id !== 'USR-ADMIN-01');
+    return planType === 'All' ? validMocks : validMocks.filter(u => u.planType === planType);
   },
 
   async createUser(memberData) {

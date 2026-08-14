@@ -11,7 +11,7 @@ export function SettingsPage() {
   const [activeTab, setActiveTab] = useState('ai-keys');
   const [showKey, setShowKey] = useState(false);
   const [settings, setSettings] = useState({
-    siteName: 'AURA Yoga & Mindfulness Platform',
+    siteName: 'Yoga Fitness & Mindfulness Platform',
     aiModelVersion: 'v2.4-NeuralFlow',
     razorpayKeyConfig: 'rzp_test_51Pq349YogaKey2026',
     healthKitEnabled: true,

@@ -2,11 +2,13 @@ import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { NAVIGATION_SECTIONS } from '../../constants/navigation';
+import { useApp } from '../../context/AppContext';
 import { Flower2, ChevronLeft, ChevronRight, Sparkles, LogOut, Shield } from 'lucide-react';
 import clsx from 'clsx';
 
 export function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, setIsMobileOpen }) {
   const location = useLocation();
+  const { adminUser } = useApp();
 
   const sidebarContent = (
     <div className="h-full flex flex-col justify-between py-5 px-3 select-none">
@@ -20,7 +22,7 @@ export function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, setIsMobile
             {!isCollapsed && (
               <div>
                 <span className="text-xl font-extrabold tracking-tight font-sans text-slate-900 dark:text-white flex items-center gap-1">
-                  AURA <span className="gradient-text-primary text-xs font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-indigo-500/10 border border-indigo-500/20">AI</span>
+                  Yoga Fitness <span className="gradient-text-primary text-xs font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-indigo-500/10 border border-indigo-500/20">AI</span>
                 </span>
                 <p className="text-[10px] font-semibold text-slate-500 dark:text-slate-400">
                   Yoga & Health SaaS
@@ -102,7 +104,7 @@ export function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, setIsMobile
         <div className={clsx('flex items-center gap-3 p-2 rounded-xl bg-slate-100 dark:bg-slate-800/50', isCollapsed && 'justify-center p-1.5')}>
           <div className="relative shrink-0">
             <img
-              src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150"
+              src={adminUser?.avatar || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=150"}
               alt="Admin"
               className="w-8 h-8 rounded-lg object-cover ring-2 ring-indigo-500/40"
             />
@@ -111,7 +113,7 @@ export function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, setIsMobile
 
           {!isCollapsed && (
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-bold text-slate-900 dark:text-white truncate">Dr. Sarah Jenkins</p>
+              <p className="text-xs font-bold text-slate-900 dark:text-white truncate">{adminUser?.name || 'Yoga Fitness Admin'}</p>
               <p className="text-[10px] font-medium text-slate-400 truncate flex items-center gap-1">
                 <Shield className="w-3 h-3 text-indigo-400" /> Super Administrator
               </p>
