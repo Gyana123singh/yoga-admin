@@ -21,7 +21,8 @@ async function request(endpoint, options = {}) {
   const primaryUrl = API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL;
   const secondaryUrl = LIVE_API_URL.endsWith('/') ? LIVE_API_URL.slice(0, -1) : LIVE_API_URL;
 
-  const targetUrls = [primaryUrl, secondaryUrl];
+  const isNonLocalhost = typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+  const targetUrls = isNonLocalhost ? [secondaryUrl, primaryUrl] : [primaryUrl, secondaryUrl];
 
   const adminToken = localStorage.getItem('aura_admin_token');
   const authHeaders = adminToken ? { 'Authorization': `Bearer ${adminToken}` } : {};
