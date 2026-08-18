@@ -804,7 +804,15 @@ export function ProgramManagerPage() {
                         onChange={async (e) => {
                           const file = e.target.files[0];
                           if (!file) return;
-                          showToast(`Uploading step video file...`, 'info');
+
+                          // Client-side file size check (500MB limit)
+                          const maxMB = 500;
+                          if (file.size > maxMB * 1024 * 1024) {
+                            showToast(`File size (${(file.size / (1024 * 1024)).toFixed(1)}MB) exceeds maximum limit of ${maxMB}MB. Please compress the video or enter URL directly.`, 'error');
+                            return;
+                          }
+
+                          showToast(`Uploading step video file (${(file.size / (1024 * 1024)).toFixed(1)}MB)...`, 'info');
                           const formData = new FormData();
                           formData.append('media', file);
                           try {
