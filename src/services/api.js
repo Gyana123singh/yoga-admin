@@ -20,7 +20,13 @@ export function getTargetUrls() {
   const primaryUrl = API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL;
   const secondaryUrl = LIVE_API_URL.endsWith('/') ? LIVE_API_URL.slice(0, -1) : LIVE_API_URL;
   const isNonLocalhost = typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
-  return isNonLocalhost ? [secondaryUrl, primaryUrl] : [primaryUrl, secondaryUrl];
+  
+  if (isNonLocalhost) {
+    return primaryUrl.includes('localhost') || primaryUrl.includes('127.0.0.1')
+      ? [secondaryUrl]
+      : [secondaryUrl, primaryUrl];
+  }
+  return [primaryUrl, secondaryUrl];
 }
 
 // Smart auto-failover: Try VITE_API_BASE_URL (localhost) first; if unavailable, failover to VITE_LIVE_API_URL
@@ -182,9 +188,7 @@ export const api = {
 
   async createBreathingTechnique(dataObj) {
     if (dataObj instanceof FormData) {
-      const primaryUrl = API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL;
-      const secondaryUrl = LIVE_API_URL.endsWith('/') ? LIVE_API_URL.slice(0, -1) : LIVE_API_URL;
-      for (const baseUrl of [primaryUrl, secondaryUrl]) {
+      for (const baseUrl of getTargetUrls()) {
         try {
           const res = await fetch(`${baseUrl}/breathing`, { method: 'POST', body: dataObj });
           if (res.ok) {
@@ -205,9 +209,7 @@ export const api = {
 
   async updateBreathingTechnique(id, updateData) {
     if (updateData instanceof FormData) {
-      const primaryUrl = API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL;
-      const secondaryUrl = LIVE_API_URL.endsWith('/') ? LIVE_API_URL.slice(0, -1) : LIVE_API_URL;
-      for (const baseUrl of [primaryUrl, secondaryUrl]) {
+      for (const baseUrl of getTargetUrls()) {
         try {
           const res = await fetch(`${baseUrl}/breathing/${id}`, { method: 'PUT', body: updateData });
           if (res.ok) {
@@ -239,9 +241,7 @@ export const api = {
 
   async createExercise(dataObj) {
     if (dataObj instanceof FormData) {
-      const primaryUrl = API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL;
-      const secondaryUrl = LIVE_API_URL.endsWith('/') ? LIVE_API_URL.slice(0, -1) : LIVE_API_URL;
-      for (const baseUrl of [primaryUrl, secondaryUrl]) {
+      for (const baseUrl of getTargetUrls()) {
         try {
           const res = await fetch(`${baseUrl}/exercises`, { method: 'POST', body: dataObj });
           if (res.ok) {
@@ -262,9 +262,7 @@ export const api = {
 
   async updateExercise(id, updateData) {
     if (updateData instanceof FormData) {
-      const primaryUrl = API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL;
-      const secondaryUrl = LIVE_API_URL.endsWith('/') ? LIVE_API_URL.slice(0, -1) : LIVE_API_URL;
-      for (const baseUrl of [primaryUrl, secondaryUrl]) {
+      for (const baseUrl of getTargetUrls()) {
         try {
           const res = await fetch(`${baseUrl}/exercises/${id}`, { method: 'PUT', body: updateData });
           if (res.ok) {
@@ -549,9 +547,7 @@ export const api = {
 
   async createQuickPractice(payload) {
     if (payload instanceof FormData) {
-      const primaryUrl = API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL;
-      const secondaryUrl = LIVE_API_URL.endsWith('/') ? LIVE_API_URL.slice(0, -1) : LIVE_API_URL;
-      for (const baseUrl of [primaryUrl, secondaryUrl]) {
+      for (const baseUrl of getTargetUrls()) {
         try {
           const res = await fetch(`${baseUrl}/quick-practices`, { method: 'POST', body: payload });
           if (res.ok) {
@@ -569,9 +565,7 @@ export const api = {
 
   async updateQuickPractice(id, payload) {
     if (payload instanceof FormData) {
-      const primaryUrl = API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL;
-      const secondaryUrl = LIVE_API_URL.endsWith('/') ? LIVE_API_URL.slice(0, -1) : LIVE_API_URL;
-      for (const baseUrl of [primaryUrl, secondaryUrl]) {
+      for (const baseUrl of getTargetUrls()) {
         try {
           const res = await fetch(`${baseUrl}/quick-practices/${id}`, { method: 'PUT', body: payload });
           if (res.ok) {
@@ -607,9 +601,7 @@ export const api = {
 
   async createYogaProgram(payload) {
     if (payload instanceof FormData) {
-      const primaryUrl = API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL;
-      const secondaryUrl = LIVE_API_URL.endsWith('/') ? LIVE_API_URL.slice(0, -1) : LIVE_API_URL;
-      for (const baseUrl of [primaryUrl, secondaryUrl]) {
+      for (const baseUrl of getTargetUrls()) {
         try {
           const res = await fetch(`${baseUrl}/yoga-programs`, { method: 'POST', body: payload });
           if (res.ok) {
@@ -627,9 +619,7 @@ export const api = {
 
   async updateYogaProgram(id, payload) {
     if (payload instanceof FormData) {
-      const primaryUrl = API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL;
-      const secondaryUrl = LIVE_API_URL.endsWith('/') ? LIVE_API_URL.slice(0, -1) : LIVE_API_URL;
-      for (const baseUrl of [primaryUrl, secondaryUrl]) {
+      for (const baseUrl of getTargetUrls()) {
         try {
           const res = await fetch(`${baseUrl}/yoga-programs/${id}`, { method: 'PUT', body: payload });
           if (res.ok) {
@@ -667,9 +657,7 @@ export const api = {
 
   async saveCalendarCategory(payload) {
     if (payload instanceof FormData) {
-      const primaryUrl = API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL;
-      const secondaryUrl = LIVE_API_URL.endsWith('/') ? LIVE_API_URL.slice(0, -1) : LIVE_API_URL;
-      for (const baseUrl of [primaryUrl, secondaryUrl]) {
+      for (const baseUrl of getTargetUrls()) {
         try {
           const res = await fetch(`${baseUrl}/daily-schedule/categories`, { method: 'POST', body: payload });
           if (res.ok) {
@@ -698,9 +686,7 @@ export const api = {
 
   async addDailySchedule(payload) {
     if (payload instanceof FormData) {
-      const primaryUrl = API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL;
-      const secondaryUrl = LIVE_API_URL.endsWith('/') ? LIVE_API_URL.slice(0, -1) : LIVE_API_URL;
-      for (const baseUrl of [primaryUrl, secondaryUrl]) {
+      for (const baseUrl of getTargetUrls()) {
         try {
           const res = await fetch(`${baseUrl}/daily-schedule`, { method: 'POST', body: payload });
           if (res.ok) {
