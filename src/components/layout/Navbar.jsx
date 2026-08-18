@@ -208,7 +208,9 @@ export function Navbar({ isCollapsed, onMobileToggle }) {
             {isProfileOpen && (
               <div className="absolute right-0 mt-2 w-56 p-2 rounded-2xl glass-card-light dark:glass-card-dark border border-slate-200 dark:border-slate-800 shadow-2xl z-50 space-y-1">
                 <div className="px-3 py-2 border-b border-slate-200/60 dark:border-slate-800">
-                  <p className="text-xs font-bold text-slate-900 dark:text-white">{adminUser?.name || 'Yoga Fitness Admin'}</p>
+                  <p className="text-xs font-bold text-slate-900 dark:text-white whitespace-nowrap">
+                    {(adminUser?.name && adminUser.name !== 'Yoga Fitness Admin' && adminUser.name !== 'yogapranafitness Admin') ? adminUser.name : 'Yoga Prana Fitness Admin'}
+                  </p>
                   <p className="text-[10px] text-slate-400">{adminUser?.email || 'admin@gmail.com'}</p>
                 </div>
                 <button

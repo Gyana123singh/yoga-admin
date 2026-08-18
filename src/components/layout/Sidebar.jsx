@@ -21,12 +21,9 @@ export function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, setIsMobile
             </div>
             {!isCollapsed && (
               <div>
-                <span className="text-xl font-extrabold tracking-tight font-sans text-slate-900 dark:text-white flex items-center gap-1">
-                  Yoga Fitness <span className="gradient-text-primary text-xs font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-indigo-500/10 border border-indigo-500/20">AI</span>
+                <span className="text-base font-extrabold tracking-tight font-sans text-slate-900 dark:text-white flex items-center gap-1.5 whitespace-nowrap">
+                  Yoga Prana Fitness 
                 </span>
-                <p className="text-[10px] font-semibold text-slate-500 dark:text-slate-400">
-                  Yoga & Health SaaS
-                </p>
               </div>
             )}
           </div>
@@ -71,16 +68,8 @@ export function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, setIsMobile
                       <Icon className={clsx('w-4 h-4 shrink-0 transition-transform group-hover:scale-110', isActive ? 'text-white' : 'text-slate-400 group-hover:text-indigo-500')} />
 
                       {!isCollapsed && (
-                        <div className="flex-1 flex items-center justify-between min-w-0">
+                        <div className="flex-1 min-w-0">
                           <span className="truncate">{item.label}</span>
-                          {item.badge && (
-                            <span className={clsx(
-                              'px-2 py-0.5 text-[9px] font-extrabold rounded-full border shadow-2xs',
-                              item.badgeColor || (isActive ? 'bg-white/20 text-white border-white/30' : 'bg-indigo-500/10 text-indigo-500 border-indigo-500/20')
-                            )}>
-                              {item.badge}
-                            </span>
-                          )}
                         </div>
                       )}
 
@@ -113,7 +102,9 @@ export function Sidebar({ isCollapsed, setIsCollapsed, isMobileOpen, setIsMobile
 
           {!isCollapsed && (
             <div className="flex-1 min-w-0">
-              <p className="text-xs font-bold text-slate-900 dark:text-white truncate">{adminUser?.name || 'Yoga Fitness Admin'}</p>
+              <p className="text-xs font-bold text-slate-900 dark:text-white truncate whitespace-nowrap">
+                {(adminUser?.name && adminUser.name !== 'Yoga Fitness Admin' && adminUser.name !== 'yogapranafitness Admin') ? adminUser.name : 'Yoga Prana Fitness Admin'}
+              </p>
               <p className="text-[10px] font-medium text-slate-400 truncate flex items-center gap-1">
                 <Shield className="w-3 h-3 text-indigo-400" /> Super Administrator
               </p>

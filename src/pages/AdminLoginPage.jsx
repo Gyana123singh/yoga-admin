@@ -52,7 +52,7 @@ export function AdminLoginPage() {
           </div>
           
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-xs font-bold text-indigo-400">
-            <Sparkles className="w-3.5 h-3.5" /> Yoga Fitness Admin Portal
+            <Sparkles className="w-3.5 h-3.5" /> Yoga Prana Fitness Admin Portal
           </div>
 
           <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">

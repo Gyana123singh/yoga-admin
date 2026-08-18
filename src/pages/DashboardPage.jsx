@@ -49,15 +49,26 @@ export function DashboardPage() {
     {
       header: 'User',
       accessor: 'name',
-      cell: (row) => (
-        <div className="flex items-center gap-3">
-          <img src={row.avatar} alt={row.name} className="w-9 h-9 rounded-xl object-cover ring-2 ring-indigo-500/20" />
-          <div>
-            <p className="font-bold text-slate-900 dark:text-white text-xs">{row.name}</p>
-            <p className="text-[10px] text-slate-400">{row.email}</p>
+      cell: (row) => {
+        const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(row.name || 'User')}&background=6366f1&color=fff&bold=true`;
+        return (
+          <div className="flex items-center gap-3">
+            <img
+              src={row.avatar || fallbackAvatar}
+              alt={row.name}
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = fallbackAvatar;
+              }}
+              className="w-9 h-9 rounded-xl object-cover ring-2 ring-indigo-500/20"
+            />
+            <div>
+              <p className="font-bold text-slate-900 dark:text-white text-xs">{row.name}</p>
+              <p className="text-[10px] text-slate-400">{row.email}</p>
+            </div>
           </div>
-        </div>
-      )
+        );
+      }
     },
     {
       header: 'Plan',
@@ -95,32 +106,7 @@ export function DashboardPage() {
 
   return (
     <div className="space-y-6 sm:space-y-8">
-      {/* Top Banner */}
-      <div className="p-4 xs:p-6 sm:p-8 rounded-2xl sm:rounded-3xl gradient-bg-primary text-white shadow-glow-primary relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-5 sm:gap-6">
-        <div className="space-y-2 relative z-10 max-w-xl">
-          <div className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-[10px] sm:text-xs font-bold text-cyan-200">
-            <Sparkles className="w-3.5 h-3.5 text-cyan-300 animate-spin-slow shrink-0" />
-            <span className="truncate">Yoga Fitness AI Platform Executive Suite</span>
-          </div>
-          <h1 className="text-xl xs:text-2xl sm:text-4xl font-extrabold tracking-tight">
-            Mindful Wellness Intelligence
-          </h1>
-          <p className="text-xs sm:text-sm text-indigo-100/90 leading-relaxed font-medium">
-            Real-time biometric monitoring, automated recommendation rules, AI practice sequencing, and live global telemetry.
-          </p>
-        </div>
-
-        <div className="flex flex-col xs:flex-row items-stretch xs:items-center gap-2.5 sm:gap-3 relative z-10 w-full md:w-auto">
-          <Button
-            variant="glass"
-            className="bg-white/10 text-white hover:bg-white/20 border-white/30 w-full xs:w-auto"
-            icon={Sparkles}
-            onClick={() => navigate('/ai-generator')}
-          >
-            Launch AI Generator
-          </Button>
-        </div>
-      </div>
+    
 
       {/* KPI Cards Grid */}
       <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5 md:gap-6">

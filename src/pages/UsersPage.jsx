@@ -48,15 +48,26 @@ export function UsersPage() {
     {
       header: 'Member',
       accessor: 'name',
-      cell: (row) => (
-        <div className="flex items-center gap-3">
-          <img src={row.avatar} alt={row.name} className="w-10 h-10 rounded-xl object-cover ring-2 ring-indigo-500/20" />
-          <div>
-            <p className="font-bold text-slate-900 dark:text-white text-sm">{row.name}</p>
-            <p className="text-xs text-slate-400">{row.email}</p>
+      cell: (row) => {
+        const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(row.name || 'User')}&background=6366f1&color=fff&bold=true`;
+        return (
+          <div className="flex items-center gap-3">
+            <img
+              src={row.avatar || fallbackAvatar}
+              alt={row.name}
+              onError={(e) => {
+                e.currentTarget.onerror = null;
+                e.currentTarget.src = fallbackAvatar;
+              }}
+              className="w-10 h-10 rounded-xl object-cover ring-2 ring-indigo-500/20"
+            />
+            <div>
+              <p className="font-bold text-slate-900 dark:text-white text-sm">{row.name}</p>
+              <p className="text-xs text-slate-400">{row.email}</p>
+            </div>
           </div>
-        </div>
-      )
+        );
+      }
     },
     {
       header: 'Subscription Plan',

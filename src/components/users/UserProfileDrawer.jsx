@@ -45,8 +45,12 @@ export function UserProfileDrawer() {
         {/* User Header Card */}
         <div className="p-5 rounded-2xl glass-card-light dark:glass-card-dark border border-slate-200/80 dark:border-slate-800 flex flex-col sm:flex-row items-center sm:items-start gap-4">
           <img
-            src={selectedUser.avatar}
+            src={selectedUser.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedUser.name || 'User')}&background=6366f1&color=fff&bold=true`}
             alt={selectedUser.name}
+            onError={(e) => {
+              e.currentTarget.onerror = null;
+              e.currentTarget.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(selectedUser.name || 'User')}&background=6366f1&color=fff&bold=true`;
+            }}
             className="w-20 h-20 rounded-2xl object-cover ring-4 ring-indigo-500/20 shrink-0"
           />
 

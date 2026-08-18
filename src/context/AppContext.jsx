@@ -34,7 +34,17 @@ export function AppProvider({ children }) {
   });
   const [adminUser, setAdminUser] = useState(() => {
     const saved = localStorage.getItem('aura_admin_user');
-    return saved ? JSON.parse(saved) : null;
+    if (!saved) return null;
+    try {
+      const u = JSON.parse(saved);
+      if (u && (!u.name || u.name === 'Yoga Fitness Admin' || u.name === 'yogapranafitness Admin' || u.name.includes('Yoga Fitness'))) {
+        u.name = 'Yoga Prana Fitness Admin';
+        localStorage.setItem('aura_admin_user', JSON.stringify(u));
+      }
+      return u;
+    } catch (e) {
+      return null;
+    }
   });
 
   // Verify stored token with real-time backend API on initial mount
@@ -44,8 +54,12 @@ export function AppProvider({ children }) {
       if (token && localStorage.getItem('aura_admin_logged_in') === 'true') {
         const res = await api.checkAdminSession();
         if (res && res.success && res.data) {
-          setAdminUser(res.data);
-          localStorage.setItem('aura_admin_user', JSON.stringify(res.data));
+          const uData = { ...res.data };
+          if (!uData.name || uData.name === 'Yoga Fitness Admin' || uData.name === 'yogapranafitness Admin' || uData.name.includes('Yoga Fitness')) {
+            uData.name = 'Yoga Prana Fitness Admin';
+          }
+          setAdminUser(uData);
+          localStorage.setItem('aura_admin_user', JSON.stringify(uData));
         } else if (res && res.success === false) {
           logoutAdmin(false);
         }
