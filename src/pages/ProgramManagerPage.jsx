@@ -808,20 +808,15 @@ export function ProgramManagerPage() {
                           const formData = new FormData();
                           formData.append('media', file);
                           try {
-                            const uploadEndpoint = `${api.API_BASE_URL}/yoga-programs/upload`;
-                            const res = await fetch(uploadEndpoint, {
-                              method: 'POST',
-                              body: formData
-                            });
-                            if (res.ok) {
-                              const data = await res.json();
+                            const data = await api.uploadYogaProgramVideo(formData);
+                            if (data && (data.url || data.data?.url)) {
                               const uploadedUrl = data.url || data.data?.url;
                               const updated = [...scheduleModal.steps];
                               updated[idx].videoUrl = uploadedUrl;
                               setScheduleModal({ ...scheduleModal, steps: updated });
                               showToast(`Step video uploaded successfully!`, 'success');
                             } else {
-                              showToast(`Upload error code ${res.status}`, 'error');
+                              showToast(`Upload failed. Please check backend connection.`, 'error');
                             }
                           } catch (err) {
                             showToast(`Upload failed: ${err.message}`, 'error');

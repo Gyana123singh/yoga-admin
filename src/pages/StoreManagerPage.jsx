@@ -5,8 +5,7 @@ import {
   X, Check, ExternalLink, Image as ImageIcon, Sparkles, Filter
 } from 'lucide-react';
 import { useApp } from '../context/AppContext';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+import { getTargetUrls } from '../services/api';
 
 export function StoreManagerPage() {
   const { showToast } = useApp();
@@ -27,16 +26,24 @@ export function StoreManagerPage() {
       const formData = new FormData();
       formData.append('image', file);
 
-      const res = await fetch(`${API_BASE_URL}/store/upload`, {
-        method: 'POST',
-        body: formData
-      });
-      const data = await res.json();
-      if (data.success && data.url) {
+      let data = null;
+      for (const baseUrl of getTargetUrls()) {
+        try {
+          const res = await fetch(`${baseUrl}/store/upload`, {
+            method: 'POST',
+            body: formData
+          });
+          if (res.ok) {
+            data = await res.json();
+            break;
+          }
+        } catch (e) {}
+      }
+      if (data && data.success && data.url) {
         onSuccess(data.url);
         showToast('Image uploaded successfully via Cloudinary / Local storage!', 'success');
       } else {
-        showToast(data.message || 'Failed to upload image', 'danger');
+        showToast(data?.message || 'Failed to upload image', 'danger');
       }
     } catch (err) {
       showToast('Error uploading image file', 'danger');
@@ -114,7 +121,8 @@ export function StoreManagerPage() {
     // Try dynamic import of socket.io-client
     import('socket.io-client')
       .then(({ io }) => {
-        const socketHost = API_BASE_URL.replace(/\/api\/?$/, '');
+        const activeApiUrl = getTargetUrls()[0];
+        const socketHost = activeApiUrl.replace(/\/api\/?$/, '');
         socketInstance = io(socketHost, { transports: ['websocket', 'polling'] });
 
         socketInstance.on('store:new-order', (newOrder) => {
@@ -141,12 +149,13 @@ export function StoreManagerPage() {
 
   const fetchStoreData = async () => {
     setLoading(true);
+    const activeApiUrl = getTargetUrls()[0];
     try {
       const [prodRes, catRes, coupRes, ordRes] = await Promise.all([
-        fetch(`${API_BASE_URL}/store/products/admin`).then(r => r.json()).catch(() => null),
-        fetch(`${API_BASE_URL}/store/categories/admin`).then(r => r.json()).catch(() => null),
-        fetch(`${API_BASE_URL}/store/coupons`).then(r => r.json()).catch(() => null),
-        fetch(`${API_BASE_URL}/store/orders`).then(r => r.json()).catch(() => null),
+        fetch(`${activeApiUrl}/store/products/admin`).then(r => r.json()).catch(() => null),
+        fetch(`${activeApiUrl}/store/categories/admin`).then(r => r.json()).catch(() => null),
+        fetch(`${activeApiUrl}/store/coupons`).then(r => r.json()).catch(() => null),
+        fetch(`${activeApiUrl}/store/orders`).then(r => r.json()).catch(() => null),
       ]);
 
       if (prodRes?.success) setProducts(prodRes.data);

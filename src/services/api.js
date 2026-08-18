@@ -13,16 +13,19 @@ import {
 } from '../constants/mockData';
 
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
-export const LIVE_API_URL = import.meta.env.VITE_LIVE_API_URL || 'https://apiyoga.hirehand.co.in/api';
+export const LIVE_API_URL = import.meta.env.VITE_LIVE_API_URL || 'https://api.yogapranafitness.com/api';
 export const BACKEND_URL = API_BASE_URL.replace(/\/api\/?$/, '');
+
+export function getTargetUrls() {
+  const primaryUrl = API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL;
+  const secondaryUrl = LIVE_API_URL.endsWith('/') ? LIVE_API_URL.slice(0, -1) : LIVE_API_URL;
+  const isNonLocalhost = typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+  return isNonLocalhost ? [secondaryUrl, primaryUrl] : [primaryUrl, secondaryUrl];
+}
 
 // Smart auto-failover: Try VITE_API_BASE_URL (localhost) first; if unavailable, failover to VITE_LIVE_API_URL
 async function request(endpoint, options = {}) {
-  const primaryUrl = API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL;
-  const secondaryUrl = LIVE_API_URL.endsWith('/') ? LIVE_API_URL.slice(0, -1) : LIVE_API_URL;
-
-  const isNonLocalhost = typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
-  const targetUrls = isNonLocalhost ? [secondaryUrl, primaryUrl] : [primaryUrl, secondaryUrl];
+  const targetUrls = getTargetUrls();
 
   const adminToken = localStorage.getItem('aura_admin_token');
   const authHeaders = adminToken ? { 'Authorization': `Bearer ${adminToken}` } : {};
@@ -188,7 +191,7 @@ export const api = {
             const data = await res.json();
             return data.data;
           }
-        } catch (e) {}
+        } catch (e) { }
       }
       return null;
     }
@@ -211,7 +214,7 @@ export const api = {
             const data = await res.json();
             return data.data;
           }
-        } catch (e) {}
+        } catch (e) { }
       }
       return null;
     }
@@ -245,7 +248,7 @@ export const api = {
             const data = await res.json();
             return data.data;
           }
-        } catch (e) {}
+        } catch (e) { }
       }
       return null;
     }
@@ -268,7 +271,7 @@ export const api = {
             const data = await res.json();
             return data.data;
           }
-        } catch (e) {}
+        } catch (e) { }
       }
       return null;
     }
@@ -493,10 +496,7 @@ export const api = {
   },
 
   async uploadVideo(formData) {
-    const primaryUrl = API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL;
-    const secondaryUrl = LIVE_API_URL.endsWith('/') ? LIVE_API_URL.slice(0, -1) : LIVE_API_URL;
-
-    for (const baseUrl of [primaryUrl, secondaryUrl]) {
+    for (const baseUrl of getTargetUrls()) {
       try {
         const res = await fetch(`${baseUrl}/videos/upload`, {
           method: 'POST',
@@ -507,6 +507,23 @@ export const api = {
         }
       } catch (err) {
         console.warn(`[Video Upload Failover] ${baseUrl} failed, trying secondary...`);
+      }
+    }
+    return null;
+  },
+
+  async uploadYogaProgramVideo(formData) {
+    for (const baseUrl of getTargetUrls()) {
+      try {
+        const res = await fetch(`${baseUrl}/yoga-programs/upload`, {
+          method: 'POST',
+          body: formData
+        });
+        if (res.ok) {
+          return await res.json();
+        }
+      } catch (err) {
+        console.warn(`[Yoga Program Upload Failover] ${baseUrl} failed, trying secondary...`);
       }
     }
     return null;
@@ -541,7 +558,7 @@ export const api = {
             const data = await res.json();
             return data.data;
           }
-        } catch (e) {}
+        } catch (e) { }
       }
       return null;
     }
@@ -561,7 +578,7 @@ export const api = {
             const data = await res.json();
             return data.data;
           }
-        } catch (e) {}
+        } catch (e) { }
       }
       return null;
     }
@@ -599,7 +616,7 @@ export const api = {
             const data = await res.json();
             return data.data;
           }
-        } catch (e) {}
+        } catch (e) { }
       }
       return null;
     }
@@ -619,7 +636,7 @@ export const api = {
             const data = await res.json();
             return data.data;
           }
-        } catch (e) {}
+        } catch (e) { }
       }
       return null;
     }
@@ -659,7 +676,7 @@ export const api = {
             const data = await res.json();
             return data.data;
           }
-        } catch (e) {}
+        } catch (e) { }
       }
       return null;
     }
@@ -690,7 +707,7 @@ export const api = {
             const data = await res.json();
             return data.data;
           }
-        } catch (e) {}
+        } catch (e) { }
       }
       return null;
     }
@@ -797,10 +814,10 @@ export const api = {
   }
 };
 
-// Smart Socket Auto-Failover Helper (Tries local ws://localhost:5000 first, failovers to live wss://apiyoga.hirehand.co.in)
+// Smart Socket Auto-Failover Helper (Tries local ws://localhost:5000 first, failovers to live WS server)
 export function createSmartSocket(feeling, onUpdate) {
   const WS_LOCAL = 'ws://localhost:5000/socket.io/?EIO=4&transport=websocket';
-  const WS_LIVE = 'wss://apiyoga.hirehand.co.in/socket.io/?EIO=4&transport=websocket';
+  const WS_LIVE = LIVE_API_URL.replace(/^http/, 'ws').replace(/\/api\/?$/, '') + '/socket.io/?EIO=4&transport=websocket';
 
   let ws = null;
   try {
