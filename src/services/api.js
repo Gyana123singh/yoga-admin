@@ -20,7 +20,7 @@ export function getTargetUrls() {
   const primaryUrl = API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL;
   const secondaryUrl = LIVE_API_URL.endsWith('/') ? LIVE_API_URL.slice(0, -1) : LIVE_API_URL;
   const isNonLocalhost = typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
-  
+
   if (isNonLocalhost) {
     return primaryUrl.includes('localhost') || primaryUrl.includes('127.0.0.1')
       ? [secondaryUrl]
