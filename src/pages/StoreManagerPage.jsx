@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  ShoppingBag, Tag, Ticket, PackageCheck, Plus, Search, Edit2, Trash2, 
+import {
+  ShoppingBag, Tag, Ticket, PackageCheck, Plus, Search, Edit2, Trash2,
   Eye, CheckCircle, AlertTriangle, ArrowUpDown, Percent, DollarSign, Layers,
   X, Check, ExternalLink, Image as ImageIcon, Sparkles, Filter
 } from 'lucide-react';
@@ -10,7 +10,7 @@ import { getTargetUrls } from '../services/api';
 export function StoreManagerPage() {
   const { showToast } = useApp();
   const [activeTab, setActiveTab] = useState('products'); // 'products' | 'categories' | 'coupons' | 'orders'
-  
+
   // Data States
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -37,7 +37,7 @@ export function StoreManagerPage() {
             data = await res.json();
             break;
           }
-        } catch (e) {}
+        } catch (e) { }
       }
       if (data && data.success && data.url) {
         onSuccess(data.url);
@@ -59,7 +59,7 @@ export function StoreManagerPage() {
   // Modals
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
-  
+
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [editingCategory, setEditingCategory] = useState(null);
 
@@ -177,7 +177,7 @@ export function StoreManagerPage() {
       setEditingProduct(product);
       let initialGallery = [];
       if (product.imageGallery && Array.isArray(product.imageGallery) && product.imageGallery.length > 0) {
-        initialGallery = product.imageGallery.map(img => 
+        initialGallery = product.imageGallery.map(img =>
           typeof img === 'string' ? { url: img, isActive: true } : { url: img.url, isActive: img.isActive !== false }
         );
       } else if (product.images && Array.isArray(product.images) && product.images.length > 0) {
@@ -268,7 +268,7 @@ export function StoreManagerPage() {
       let data = null;
       for (const baseUrl of getTargetUrls()) {
         try {
-          const url = editingProduct 
+          const url = editingProduct
             ? `${baseUrl}/store/products/${editingProduct._id}`
             : `${baseUrl}/store/products`;
           const method = editingProduct ? 'PUT' : 'POST';
@@ -284,7 +284,7 @@ export function StoreManagerPage() {
           } else {
             data = await res.json().catch(() => null);
           }
-        } catch (e) {}
+        } catch (e) { }
       }
 
       if (data && data.success) {
@@ -312,7 +312,7 @@ export function StoreManagerPage() {
           } else {
             data = await res.json().catch(() => null);
           }
-        } catch (e) {}
+        } catch (e) { }
       }
       if (data && data.success) {
         showToast('Product deleted!', 'success');
@@ -353,7 +353,7 @@ export function StoreManagerPage() {
       let data = null;
       for (const baseUrl of getTargetUrls()) {
         try {
-          const url = editingCategory 
+          const url = editingCategory
             ? `${baseUrl}/store/categories/${editingCategory._id}`
             : `${baseUrl}/store/categories`;
           const method = editingCategory ? 'PUT' : 'POST';
@@ -369,7 +369,7 @@ export function StoreManagerPage() {
           } else {
             data = await res.json().catch(() => null);
           }
-        } catch (e) {}
+        } catch (e) { }
       }
 
       if (data && data.success) {
@@ -397,7 +397,7 @@ export function StoreManagerPage() {
           } else {
             data = await res.json().catch(() => null);
           }
-        } catch (e) {}
+        } catch (e) { }
       }
       if (data && data.success) {
         showToast('Category deleted!', 'success');
@@ -437,7 +437,7 @@ export function StoreManagerPage() {
       let data = null;
       for (const baseUrl of getTargetUrls()) {
         try {
-          const url = editingCoupon 
+          const url = editingCoupon
             ? `${baseUrl}/store/coupons/${editingCoupon._id}`
             : `${baseUrl}/store/coupons`;
           const method = editingCoupon ? 'PUT' : 'POST';
@@ -453,7 +453,7 @@ export function StoreManagerPage() {
           } else {
             data = await res.json().catch(() => null);
           }
-        } catch (e) {}
+        } catch (e) { }
       }
 
       if (data && data.success) {
@@ -481,7 +481,7 @@ export function StoreManagerPage() {
           } else {
             data = await res.json().catch(() => null);
           }
-        } catch (e) {}
+        } catch (e) { }
       }
       if (data && data.success) {
         showToast('Coupon deleted!', 'success');
@@ -593,44 +593,40 @@ export function StoreManagerPage() {
       <div className="flex border-b border-slate-200 dark:border-slate-800 gap-6">
         <button
           onClick={() => setActiveTab('products')}
-          className={`pb-3 text-xs font-extrabold transition-all border-b-2 flex items-center gap-2 ${
-            activeTab === 'products'
+          className={`pb-3 text-xs font-extrabold transition-all border-b-2 flex items-center gap-2 ${activeTab === 'products'
               ? 'border-indigo-500 text-indigo-500 dark:text-indigo-400'
               : 'border-transparent text-slate-500 hover:text-slate-900 dark:hover:text-slate-200'
-          }`}
+            }`}
         >
           <ShoppingBag className="w-4 h-4" /> Products ({products.length})
         </button>
 
         <button
           onClick={() => setActiveTab('categories')}
-          className={`pb-3 text-xs font-extrabold transition-all border-b-2 flex items-center gap-2 ${
-            activeTab === 'categories'
+          className={`pb-3 text-xs font-extrabold transition-all border-b-2 flex items-center gap-2 ${activeTab === 'categories'
               ? 'border-indigo-500 text-indigo-500 dark:text-indigo-400'
               : 'border-transparent text-slate-500 hover:text-slate-900 dark:hover:text-slate-200'
-          }`}
+            }`}
         >
           <Layers className="w-4 h-4" /> Categories ({categories.length})
         </button>
 
         <button
           onClick={() => setActiveTab('coupons')}
-          className={`pb-3 text-xs font-extrabold transition-all border-b-2 flex items-center gap-2 ${
-            activeTab === 'coupons'
+          className={`pb-3 text-xs font-extrabold transition-all border-b-2 flex items-center gap-2 ${activeTab === 'coupons'
               ? 'border-indigo-500 text-indigo-500 dark:text-indigo-400'
               : 'border-transparent text-slate-500 hover:text-slate-900 dark:hover:text-slate-200'
-          }`}
+            }`}
         >
           <Ticket className="w-4 h-4" /> Coupons & Offers ({coupons.length})
         </button>
 
         <button
           onClick={() => setActiveTab('orders')}
-          className={`pb-3 text-xs font-extrabold transition-all border-b-2 flex items-center gap-2 ${
-            activeTab === 'orders'
+          className={`pb-3 text-xs font-extrabold transition-all border-b-2 flex items-center gap-2 ${activeTab === 'orders'
               ? 'border-indigo-500 text-indigo-500 dark:text-indigo-400'
               : 'border-transparent text-slate-500 hover:text-slate-900 dark:hover:text-slate-200'
-          }`}
+            }`}
         >
           <PackageCheck className="w-4 h-4" /> Customer Purchases ({orders.length})
         </button>
@@ -1059,16 +1055,15 @@ export function StoreManagerPage() {
                         type="button"
                         onClick={() => {
                           const currentSizes = productForm.sizes || [];
-                          const updated = isSelected 
-                            ? currentSizes.filter(s => s !== sz) 
+                          const updated = isSelected
+                            ? currentSizes.filter(s => s !== sz)
                             : [...currentSizes, sz];
                           setProductForm({ ...productForm, sizes: updated });
                         }}
-                        className={`px-3 py-1.5 rounded-xl border text-xs font-black transition-all ${
-                          isSelected 
-                            ? 'bg-emerald-600 border-emerald-600 text-white shadow-xs' 
+                        className={`px-3 py-1.5 rounded-xl border text-xs font-black transition-all ${isSelected
+                            ? 'bg-emerald-600 border-emerald-600 text-white shadow-xs'
                             : 'bg-slate-50 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-500'
-                        }`}
+                          }`}
                       >
                         {sz}
                       </button>
@@ -1154,17 +1149,15 @@ export function StoreManagerPage() {
                     {productForm.imageGallery.map((img, idx) => (
                       <div
                         key={idx}
-                        className={`relative rounded-xl overflow-hidden border p-1.5 flex flex-col justify-between transition-all ${
-                          img.isActive !== false
-                            ? 'bg-white dark:bg-slate-900 border-emerald-500/50 shadow-xs ring-1 ring-emerald-500/20' 
+                        className={`relative rounded-xl overflow-hidden border p-1.5 flex flex-col justify-between transition-all ${img.isActive !== false
+                            ? 'bg-white dark:bg-slate-900 border-emerald-500/50 shadow-xs ring-1 ring-emerald-500/20'
                             : 'bg-slate-100 dark:bg-slate-900/40 border-slate-300 dark:border-slate-800 opacity-60'
-                        }`}
+                          }`}
                       >
                         <div className="relative h-24 w-full rounded-lg overflow-hidden bg-slate-200 dark:bg-slate-800 mb-1.5">
                           <img src={img.url} alt={`Gallery ${idx + 1}`} className="w-full h-full object-cover" />
-                          <span className={`absolute top-1 left-1 px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase ${
-                            img.isActive !== false ? 'bg-emerald-600 text-white' : 'bg-slate-600 text-slate-200'
-                          }`}>
+                          <span className={`absolute top-1 left-1 px-1.5 py-0.5 rounded-md text-[9px] font-black uppercase ${img.isActive !== false ? 'bg-emerald-600 text-white' : 'bg-slate-600 text-slate-200'
+                            }`}>
                             {img.isActive !== false ? '🟢 Active' : '⚪ Inactive'}
                           </span>
                           {idx === 0 && (
@@ -1178,17 +1171,16 @@ export function StoreManagerPage() {
                           <button
                             type="button"
                             onClick={() => {
-                              const updatedGallery = productForm.imageGallery.map((item, i) => 
+                              const updatedGallery = productForm.imageGallery.map((item, i) =>
                                 i === idx ? { ...item, isActive: !(item.isActive !== false) } : item
                               );
                               const activeUrls = updatedGallery.filter(i => i.isActive !== false).map(i => i.url);
                               setProductForm({ ...productForm, imageGallery: updatedGallery, images: activeUrls });
                             }}
-                            className={`flex-1 py-1 rounded-lg text-[10px] font-bold transition-colors ${
-                              img.isActive !== false 
-                                ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 hover:bg-amber-200' 
+                            className={`flex-1 py-1 rounded-lg text-[10px] font-bold transition-colors ${img.isActive !== false
+                                ? 'bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 hover:bg-amber-200'
                                 : 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 hover:bg-emerald-200'
-                            }`}
+                              }`}
                           >
                             {img.isActive !== false ? 'Set Inactive' : 'Set Active'}
                           </button>
