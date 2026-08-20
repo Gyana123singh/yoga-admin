@@ -123,7 +123,7 @@ export function StoreManagerPage() {
       .then(({ io }) => {
         const activeApiUrl = getTargetUrls()[0];
         const socketHost = activeApiUrl.replace(/\/api\/?$/, '');
-        socketInstance = io(socketHost, { transports: ['websocket', 'polling'] });
+        socketInstance = io(socketHost, { transports: ['polling', 'websocket'] });
 
         socketInstance.on('store:new-order', (newOrder) => {
           setOrders(prev => [newOrder, ...prev]);
@@ -265,24 +265,34 @@ export function StoreManagerPage() {
         images: activeGalleryUrls.length > 0 ? activeGalleryUrls : productForm.images
       };
 
-      const url = editingProduct 
-        ? `${API_BASE_URL}/store/products/${editingProduct._id}`
-        : `${API_BASE_URL}/store/products`;
-      const method = editingProduct ? 'PUT' : 'POST';
+      let data = null;
+      for (const baseUrl of getTargetUrls()) {
+        try {
+          const url = editingProduct 
+            ? `${baseUrl}/store/products/${editingProduct._id}`
+            : `${baseUrl}/store/products`;
+          const method = editingProduct ? 'PUT' : 'POST';
 
-      const res = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-      const data = await res.json();
+          const res = await fetch(url, {
+            method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          if (res.ok) {
+            data = await res.json();
+            break;
+          } else {
+            data = await res.json().catch(() => null);
+          }
+        } catch (e) {}
+      }
 
-      if (data.success) {
+      if (data && data.success) {
         showToast(editingProduct ? 'Product updated successfully!' : 'New product added!', 'success');
         setIsProductModalOpen(false);
         fetchStoreData();
       } else {
-        showToast(data.message || 'Failed to save product', 'danger');
+        showToast(data?.message || 'Failed to save product', 'danger');
       }
     } catch (err) {
       showToast('Server connection error', 'danger');
@@ -292,11 +302,23 @@ export function StoreManagerPage() {
   const handleDeleteProduct = async (id) => {
     if (!window.confirm('Are you sure you want to delete this product?')) return;
     try {
-      const res = await fetch(`${API_BASE_URL}/store/products/${id}`, { method: 'DELETE' });
-      const data = await res.json();
-      if (data.success) {
+      let data = null;
+      for (const baseUrl of getTargetUrls()) {
+        try {
+          const res = await fetch(`${baseUrl}/store/products/${id}`, { method: 'DELETE' });
+          if (res.ok) {
+            data = await res.json();
+            break;
+          } else {
+            data = await res.json().catch(() => null);
+          }
+        } catch (e) {}
+      }
+      if (data && data.success) {
         showToast('Product deleted!', 'success');
         fetchStoreData();
+      } else {
+        showToast(data?.message || 'Failed to delete product', 'danger');
       }
     } catch (e) {
       showToast('Failed to delete product', 'danger');
@@ -328,24 +350,34 @@ export function StoreManagerPage() {
   const handleSaveCategory = async (e) => {
     e.preventDefault();
     try {
-      const url = editingCategory 
-        ? `${API_BASE_URL}/store/categories/${editingCategory._id}`
-        : `${API_BASE_URL}/store/categories`;
-      const method = editingCategory ? 'PUT' : 'POST';
+      let data = null;
+      for (const baseUrl of getTargetUrls()) {
+        try {
+          const url = editingCategory 
+            ? `${baseUrl}/store/categories/${editingCategory._id}`
+            : `${baseUrl}/store/categories`;
+          const method = editingCategory ? 'PUT' : 'POST';
 
-      const res = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(categoryForm)
-      });
-      const data = await res.json();
+          const res = await fetch(url, {
+            method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(categoryForm)
+          });
+          if (res.ok) {
+            data = await res.json();
+            break;
+          } else {
+            data = await res.json().catch(() => null);
+          }
+        } catch (e) {}
+      }
 
-      if (data.success) {
+      if (data && data.success) {
         showToast(editingCategory ? 'Category updated!' : 'Category created!', 'success');
         setIsCategoryModalOpen(false);
         fetchStoreData();
       } else {
-        showToast(data.message || 'Failed to save category', 'danger');
+        showToast(data?.message || 'Failed to save category', 'danger');
       }
     } catch (e) {
       showToast('Error saving category', 'danger');
@@ -355,11 +387,23 @@ export function StoreManagerPage() {
   const handleDeleteCategory = async (id) => {
     if (!window.confirm('Delete category?')) return;
     try {
-      const res = await fetch(`${API_BASE_URL}/store/categories/${id}`, { method: 'DELETE' });
-      const data = await res.json();
-      if (data.success) {
+      let data = null;
+      for (const baseUrl of getTargetUrls()) {
+        try {
+          const res = await fetch(`${baseUrl}/store/categories/${id}`, { method: 'DELETE' });
+          if (res.ok) {
+            data = await res.json();
+            break;
+          } else {
+            data = await res.json().catch(() => null);
+          }
+        } catch (e) {}
+      }
+      if (data && data.success) {
         showToast('Category deleted!', 'success');
         fetchStoreData();
+      } else {
+        showToast(data?.message || 'Error deleting category', 'danger');
       }
     } catch (e) {
       showToast('Error deleting category', 'danger');
@@ -390,24 +434,34 @@ export function StoreManagerPage() {
   const handleSaveCoupon = async (e) => {
     e.preventDefault();
     try {
-      const url = editingCoupon 
-        ? `${API_BASE_URL}/store/coupons/${editingCoupon._id}`
-        : `${API_BASE_URL}/store/coupons`;
-      const method = editingCoupon ? 'PUT' : 'POST';
+      let data = null;
+      for (const baseUrl of getTargetUrls()) {
+        try {
+          const url = editingCoupon 
+            ? `${baseUrl}/store/coupons/${editingCoupon._id}`
+            : `${baseUrl}/store/coupons`;
+          const method = editingCoupon ? 'PUT' : 'POST';
 
-      const res = await fetch(url, {
-        method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(couponForm)
-      });
-      const data = await res.json();
+          const res = await fetch(url, {
+            method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(couponForm)
+          });
+          if (res.ok) {
+            data = await res.json();
+            break;
+          } else {
+            data = await res.json().catch(() => null);
+          }
+        } catch (e) {}
+      }
 
-      if (data.success) {
+      if (data && data.success) {
         showToast('Coupon saved successfully!', 'success');
         setIsCouponModalOpen(false);
         fetchStoreData();
       } else {
-        showToast(data.message || 'Failed to save coupon', 'danger');
+        showToast(data?.message || 'Failed to save coupon', 'danger');
       }
     } catch (e) {
       showToast('Error saving coupon', 'danger');
@@ -417,11 +471,23 @@ export function StoreManagerPage() {
   const handleDeleteCoupon = async (id) => {
     if (!window.confirm('Delete coupon code?')) return;
     try {
-      const res = await fetch(`${API_BASE_URL}/store/coupons/${id}`, { method: 'DELETE' });
-      const data = await res.json();
-      if (data.success) {
+      let data = null;
+      for (const baseUrl of getTargetUrls()) {
+        try {
+          const res = await fetch(`${baseUrl}/store/coupons/${id}`, { method: 'DELETE' });
+          if (res.ok) {
+            data = await res.json();
+            break;
+          } else {
+            data = await res.json().catch(() => null);
+          }
+        } catch (e) {}
+      }
+      if (data && data.success) {
         showToast('Coupon deleted!', 'success');
         fetchStoreData();
+      } else {
+        showToast(data?.message || 'Error deleting coupon', 'danger');
       }
     } catch (e) {
       showToast('Error deleting coupon', 'danger');
