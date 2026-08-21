@@ -16,6 +16,24 @@ export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localho
 export const LIVE_API_URL = import.meta.env.VITE_LIVE_API_URL || 'https://api.yogapranafitness.com/api';
 export const BACKEND_URL = API_BASE_URL.replace(/\/api\/?$/, '');
 
+export function getActiveApiUrl() {
+  const primaryUrl = API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL;
+  const secondaryUrl = LIVE_API_URL.endsWith('/') ? LIVE_API_URL.slice(0, -1) : LIVE_API_URL;
+  const isNonLocalhost = typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+  return isNonLocalhost ? secondaryUrl : primaryUrl;
+}
+
+export function getMediaUrl(url) {
+  if (!url) return '';
+  let resolved = url;
+  if (!resolved.startsWith('http://') && !resolved.startsWith('https://')) {
+    const activeApi = getActiveApiUrl();
+    const rootHost = activeApi.replace(/\/api\/?$/, '');
+    resolved = resolved.startsWith('/') ? `${rootHost}${resolved}` : `${rootHost}/${resolved}`;
+  }
+  return resolved;
+}
+
 export function getTargetUrls() {
   const primaryUrl = API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL;
   const secondaryUrl = LIVE_API_URL.endsWith('/') ? LIVE_API_URL.slice(0, -1) : LIVE_API_URL;
@@ -790,6 +808,19 @@ export const api = {
 
   async getDailyScheduleWeekStats() {
     const data = await request('/daily-schedule/week-stats');
+    if (data && data.success) return data.data;
+    return null;
+  },
+
+  // Explore Sessions API
+  async getExploreSessions() {
+    const data = await request('/explore-sessions');
+    if (data && data.success) return data.data;
+    return [];
+  },
+
+  async getExploreSessionById(id) {
+    const data = await request(`/explore-sessions/${id}`);
     if (data && data.success) return data.data;
     return null;
   },

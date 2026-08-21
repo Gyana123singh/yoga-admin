@@ -60,6 +60,7 @@ export const NAVIGATION_SECTIONS = [
   {
     title: 'Yoga & Practice Library',
     items: [
+      { id: 'explore-sessions', label: 'Explore Sessions Manager', icon: Compass, path: '/explore-sessions' },
       { id: 'store-manager', label: 'Yoga Kits & Store Manager', icon: ShoppingBag, path: '/store-manager' },
       { id: 'yoga-programs', label: 'Yoga Programs', icon: Flower2, path: '/yoga-programs' },
       { id: 'breathing', label: 'Breathing Library', icon: Wind, path: '/breathing' },
