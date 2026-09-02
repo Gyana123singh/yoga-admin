@@ -37,17 +37,22 @@ export function getMediaUrl(url) {
 export function getTargetUrls() {
   const primaryUrl = API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL;
   const secondaryUrl = LIVE_API_URL.endsWith('/') ? LIVE_API_URL.slice(0, -1) : LIVE_API_URL;
-  const isNonLocalhost = typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
-
-  if (isNonLocalhost) {
-    return primaryUrl.includes('localhost') || primaryUrl.includes('127.0.0.1')
-      ? [secondaryUrl]
-      : [secondaryUrl, primaryUrl];
+  
+  const currentHost = typeof window !== 'undefined' ? window.location.hostname : 'localhost';
+  let localApiUrl = primaryUrl;
+  if (typeof window !== 'undefined' && currentHost !== 'localhost' && currentHost !== '127.0.0.1') {
+    localApiUrl = `http://${currentHost}:5000/api`;
   }
-  return [primaryUrl, secondaryUrl];
+
+  const urls = [primaryUrl];
+  if (localApiUrl !== primaryUrl) urls.push(localApiUrl);
+  if (secondaryUrl && !secondaryUrl.includes('yogapranafitness.com')) {
+    urls.push(secondaryUrl);
+  }
+  return urls;
 }
 
-// Smart auto-failover: Try VITE_API_BASE_URL (localhost) first; if unavailable, failover to VITE_LIVE_API_URL
+// Smart auto-failover: Try VITE_API_BASE_URL (localhost) first; if unavailable, failover to secondary
 async function request(endpoint, options = {}) {
   const targetUrls = getTargetUrls();
 
@@ -57,7 +62,7 @@ async function request(endpoint, options = {}) {
   for (const baseUrl of targetUrls) {
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 4000); // 4s timeout per attempt
+      const timeoutId = setTimeout(() => controller.abort(), 2500); // 2.5s timeout per attempt
 
       const res = await fetch(`${baseUrl}${endpoint}`, {
         headers: {
@@ -81,11 +86,10 @@ async function request(endpoint, options = {}) {
         return json;
       }
     } catch (err) {
-      console.warn(`[API Auto-Failover] ${baseUrl}${endpoint} failed (${err.message}). Retrying on live server...`);
+      console.warn(`[API Connection] ${baseUrl}${endpoint} notice (${err.message})`);
     }
   }
 
-  console.warn(`[API Fallback] Both local & live backends unavailable for ${endpoint}. Using fallback state.`);
   return null;
 }
 
@@ -116,13 +120,30 @@ export const api = {
     if (data && data.success) return data;
     return {
       success: true,
-      stats: DASHBOARD_STATS,
-      revenueRetentionSeries: REVENUE_RETENTION_SERIES,
-      dailyPracticeDistribution: DAILY_PRACTICE_DISTRIBUTION,
-      countryAnalytics: COUNTRY_ANALYTICS,
-      recentNotifications: MOCK_RECENT_NOTIFICATIONS,
-      liveClasses: MOCK_LIVE_CLASSES,
-      healthSyncs: SMARTWATCH_USAGE_STATS
+      stats: {
+        totalUsers: 0,
+        userGrowth: 0,
+        premiumUsers: 0,
+        premiumGrowth: 0,
+        activeUsersToday: 0,
+        dailySessions: 0,
+        meditationMinutesToday: 0,
+        avgMinutesPerUser: 0,
+        monthlyRevenue: 0,
+        mrrGrowth: 0,
+        retentionRate: 0,
+        avgStreakDays: 0,
+        serverUptime: 99.99,
+        watchSyncActive: 0,
+        counts: { asanas: 0, breathing: 0, activeRules: 0, liveClasses: 0 }
+      },
+      revenueRetentionSeries: [],
+      dailyPracticeDistribution: [],
+      countryAnalytics: [],
+      recentNotifications: [],
+      liveClasses: [],
+      healthSyncs: [],
+      recentUsers: []
     };
   },
 
@@ -131,8 +152,7 @@ export const api = {
     const query = planType !== 'All' ? `?planType=${planType}` : '';
     const data = await request(`/users${query}`);
     if (data && data.success) return data.data;
-    const validMocks = MOCK_USERS.filter(u => u.authProvider !== 'admin' && u.id !== 'USR-ADMIN-01');
-    return planType === 'All' ? validMocks : validMocks.filter(u => u.planType === planType);
+    return [];
   },
 
   async createUser(memberData) {
