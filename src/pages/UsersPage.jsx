@@ -5,7 +5,7 @@ import { Button } from '../components/common/Button';
 import { AddMemberModal } from '../components/modals/AddMemberModal';
 import { useApp } from '../context/AppContext';
 import { api, BACKEND_URL } from '../services/api';
-import { Users, UserPlus, Flame, Watch, Globe } from 'lucide-react';
+import { Users, UserPlus, Flame, Watch, Globe, RefreshCw, Trash2 } from 'lucide-react';
 
 export function UsersPage() {
   const { setSelectedUser, showToast } = useApp();
@@ -14,20 +14,20 @@ export function UsersPage() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
+  async function loadUsers(showLoader = true) {
+    if (showLoader) setIsLoading(true);
+    const data = await api.getUsers(filterPlan);
+    if (data) {
+      setUsersList(data);
+    }
+    if (showLoader) setIsLoading(false);
+  }
+
   useEffect(() => {
     let isMounted = true;
-    async function loadUsers(showLoader = true) {
-      if (showLoader) setIsLoading(true);
-      const data = await api.getUsers(filterPlan);
-      if (isMounted && data) {
-        setUsersList(data);
-      }
-      if (showLoader && isMounted) setIsLoading(false);
-    }
-
     loadUsers(true);
 
-    // Auto-sync polling every 4 seconds to instantly capture new Google customer signups
+    // Auto-sync polling every 4 seconds to instantly capture new customer signups from MongoDB
     const interval = setInterval(() => {
       loadUsers(false);
     }, 4000);
@@ -40,8 +40,21 @@ export function UsersPage() {
 
   const handleAddMember = async (newMember) => {
     const created = await api.createUser(newMember);
-    setUsersList((prev) => [created, ...prev]);
-    showToast(`Member ${created.name} successfully added!`, 'success');
+    if (created) {
+      setUsersList((prev) => [created, ...prev]);
+      showToast(`Member ${created.name} successfully added!`, 'success');
+      loadUsers(false);
+    }
+  };
+
+  const handleDeleteUser = async (id) => {
+    if (!window.confirm('Are you sure you want to remove this member from the database?')) return;
+    const res = await api.deleteUser(id);
+    if (res && res.success) {
+      setUsersList((prev) => prev.filter((u) => u.id !== id && u._id !== id));
+      showToast('Member removed from MongoDB', 'warning');
+      loadUsers(false);
+    }
   };
 
   const columns = [
@@ -75,9 +88,9 @@ export function UsersPage() {
       cell: (row) => (
         <div>
           <Badge variant={row.planType === 'Premium' ? 'indigo' : 'slate'}>
-            {row.planType}
+            {row.planType || 'Free'}
           </Badge>
-          <p className="text-[10px] font-medium text-slate-400 mt-1">{row.plan}</p>
+          <p className="text-[10px] font-medium text-slate-400 mt-1">{row.plan || 'Starter Free'}</p>
         </div>
       )
     },
@@ -87,7 +100,7 @@ export function UsersPage() {
       cell: (row) => (
         <div>
           <span className="inline-flex items-center gap-1 text-xs font-extrabold text-amber-500">
-            <Flame className="w-3.5 h-3.5" /> {row.streak} Days
+            <Flame className="w-3.5 h-3.5" /> {row.streak || 0} Days
           </span>
           <p className="text-[10px] text-slate-400">{row.totalMinutes ? row.totalMinutes.toLocaleString() : 0} mins practice</p>
         </div>
@@ -115,7 +128,7 @@ export function UsersPage() {
       accessor: 'country',
       cell: (row) => (
         <span className="text-xs font-semibold text-slate-600 dark:text-slate-300 flex items-center gap-1">
-          <Globe className="w-3.5 h-3.5 text-indigo-400" /> {row.country}
+          <Globe className="w-3.5 h-3.5 text-indigo-400" /> {row.country || 'United States'}
         </span>
       )
     },
@@ -124,8 +137,24 @@ export function UsersPage() {
       accessor: 'status',
       cell: (row) => (
         <Badge variant={row.status === 'Active' ? 'emerald' : 'rose'}>
-          {row.status}
+          {row.status || 'Active'}
         </Badge>
+      )
+    },
+    {
+      header: 'Actions',
+      accessor: 'actions',
+      cell: (row) => (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            handleDeleteUser(row.id || row._id);
+          }}
+          title="Remove Member"
+          className="p-1.5 rounded-lg hover:bg-rose-500/10 text-slate-400 hover:text-rose-500 transition-colors"
+        >
+          <Trash2 className="w-4 h-4" />
+        </button>
       )
     }
   ];
@@ -144,6 +173,13 @@ export function UsersPage() {
         </div>
 
         <div className="flex items-center gap-3 w-full sm:w-auto">
+          <Button
+            variant="secondary"
+            icon={RefreshCw}
+            onClick={() => loadUsers(true)}
+          >
+            Refresh
+          </Button>
           <Button
             variant="primary"
             icon={UserPlus}
