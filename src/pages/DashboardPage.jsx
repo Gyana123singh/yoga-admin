@@ -25,13 +25,26 @@ export function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    async function loadDashboard() {
-      setIsLoading(true);
+    let isMounted = true;
+    async function loadDashboard(showLoader = true) {
+      if (showLoader) setIsLoading(true);
       const res = await api.getDashboardStats();
-      setDashboardData(res);
-      setIsLoading(false);
+      if (isMounted && res) {
+        setDashboardData(res);
+      }
+      if (showLoader && isMounted) setIsLoading(false);
     }
-    loadDashboard();
+
+    loadDashboard(true);
+
+    const interval = setInterval(() => {
+      loadDashboard(false);
+    }, 4000);
+
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
   }, []);
 
   const stats = dashboardData?.stats || {
@@ -110,7 +123,7 @@ export function DashboardPage() {
 
   return (
     <div className="space-y-6 sm:space-y-8">
-    
+
 
       {/* KPI Cards Grid */}
       <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5 md:gap-6">
