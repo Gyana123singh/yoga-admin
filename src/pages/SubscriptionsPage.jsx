@@ -38,20 +38,15 @@ export function SubscriptionsPage() {
     { id: 'annual', name: 'Annual Pro', price: '$149/yr', users: '14,710 members', features: 'Save 20%, Live Stream Masterclasses, Family sharing', period: 'Per year' },
   ]);
 
-  const invoices = [
-    { id: 'INV-9021', user: 'Elena Rostova', plan: 'Annual Pro', amount: '$149.00', status: 'Paid', date: '2024-06-01' },
-    { id: 'INV-9022', user: 'Marcus Vance', plan: 'Monthly Pro', amount: '$14.99', status: 'Paid', date: '2024-06-01' },
-    { id: 'INV-9023', user: 'Dr. Liam Thorne', plan: 'Pro Lifetime', amount: '$499.00', status: 'Paid', date: '2024-05-28' },
-    { id: 'INV-9024', user: 'Sophia Chen', plan: 'Monthly Pro', amount: '$14.99', status: 'Paid', date: '2024-05-25' },
-    { id: 'INV-9025', user: 'Amara Diop', plan: 'Annual Pro', amount: '$149.00', status: 'Refunded', date: '2024-05-20' },
-  ];
+  const [invoices, setInvoices] = useState([]);
 
   useEffect(() => {
     async function loadSubscriptionData() {
       setIsLoading(true);
-      const [summaryRes, couponsRes] = await Promise.all([
+      const [summaryRes, couponsRes, usersRes] = await Promise.all([
         api.getSubscriptionsSummary(),
-        api.getCoupons()
+        api.getCoupons(),
+        api.getUsers()
       ]);
 
       if (summaryRes) {
@@ -59,6 +54,17 @@ export function SubscriptionsPage() {
       }
       if (couponsRes) {
         setCouponsList(couponsRes);
+      }
+      if (usersRes && usersRes.length > 0) {
+        const formattedInvoices = usersRes.map((u, i) => ({
+          id: `INV-${1000 + i}`,
+          user: u.name || u.email || 'Member User',
+          plan: u.plan || (u.planType === 'Premium' ? 'Annual Pro' : 'Starter Free'),
+          amount: u.planType === 'Premium' ? '$149.00' : '$0.00',
+          status: u.status || 'Paid',
+          date: u.joinedDate || new Date().toISOString().split('T')[0]
+        }));
+        setInvoices(formattedInvoices);
       }
       setIsLoading(false);
     }

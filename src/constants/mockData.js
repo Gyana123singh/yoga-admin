@@ -266,7 +266,7 @@ export const MOCK_LIVE_CLASSES = [
 
 export const MOCK_RECENT_NOTIFICATIONS = [
   { id: 1, title: 'AI Model v2.4 Updated', desc: 'Recommendation latency decreased by 34ms', time: '10m ago', type: 'system' },
-  { id: 2, title: 'Apple Health Sync Spike', desc: '+4,200 new Watch telemetry streams detected', time: '35m ago', type: 'health' },
-  { id: 3, title: 'New Pro Subscription', desc: 'Elena Rostova upgraded to Annual Pro ($149)', time: '1h ago', type: 'revenue' },
-  { id: 4, title: 'High Cortisol Alert', desc: '142 users triggered rule "Stressed / High Cortisol"', time: '2h ago', type: 'alert' },
+  { id: 2, title: 'Apple Health Sync Spike', desc: 'Watch telemetry streams synchronized', time: '35m ago', type: 'health' },
+  { id: 3, title: 'New Pro Subscription', desc: 'New member upgraded to Annual Pro ($149)', time: '1h ago', type: 'revenue' },
+  { id: 4, title: 'High Cortisol Alert', desc: 'Triggered rule "Stressed / High Cortisol"', time: '2h ago', type: 'alert' },
 ];
