@@ -35,21 +35,32 @@ export function getMediaUrl(url) {
 }
 
 export function getTargetUrls() {
-  const primaryUrl = API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL;
-  const secondaryUrl = LIVE_API_URL.endsWith('/') ? LIVE_API_URL.slice(0, -1) : LIVE_API_URL;
-  
-  const currentHost = typeof window !== 'undefined' ? window.location.hostname : 'localhost';
-  let localApiUrl = primaryUrl;
-  if (typeof window !== 'undefined' && currentHost !== 'localhost' && currentHost !== '127.0.0.1') {
-    localApiUrl = `http://${currentHost}:5000/api`;
+  const isHttps = typeof window !== 'undefined' && window.location.protocol === 'https:';
+  const isLocalhost = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+
+  let primaryUrl = API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL;
+  let secondaryUrl = LIVE_API_URL.endsWith('/') ? LIVE_API_URL.slice(0, -1) : LIVE_API_URL;
+
+  // If the web page is loaded over HTTPS, force HTTPS endpoints to prevent Mixed Content browser blocks
+  if (isHttps) {
+    if (primaryUrl.startsWith('http://') && !primaryUrl.includes('localhost') && !primaryUrl.includes('127.0.0.1')) {
+      primaryUrl = primaryUrl.replace(/^http:\/\//, 'https://');
+    }
+    if (secondaryUrl.startsWith('http://')) {
+      secondaryUrl = secondaryUrl.replace(/^http:\/\//, 'https://');
+    }
+    return [secondaryUrl, primaryUrl].filter((url, idx, self) => self.indexOf(url) === idx);
   }
 
-  const urls = [primaryUrl];
-  if (localApiUrl !== primaryUrl) urls.push(localApiUrl);
-  if (secondaryUrl && !secondaryUrl.includes('yogapranafitness.com')) {
-    urls.push(secondaryUrl);
+  // Localhost environment
+  if (isLocalhost) {
+    return [primaryUrl, secondaryUrl];
   }
-  return urls;
+
+  const currentHost = typeof window !== 'undefined' ? window.location.hostname : 'localhost';
+  const networkLocalUrl = `http://${currentHost}:5000/api`;
+
+  return [primaryUrl, networkLocalUrl, secondaryUrl].filter((url, idx, self) => self.indexOf(url) === idx);
 }
 
 // Smart auto-failover: Try VITE_API_BASE_URL (localhost) first; if unavailable, failover to secondary
