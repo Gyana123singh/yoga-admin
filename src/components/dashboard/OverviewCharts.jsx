@@ -22,7 +22,20 @@ import {
 import { Card, CardHeader, CardTitle, CardContent } from '../common/Card';
 import { Badge } from '../common/Badge';
 
-export function OverviewCharts() {
+export function OverviewCharts({
+  revenueRetentionSeries = REVENUE_RETENTION_SERIES,
+  dailyPracticeDistribution = DAILY_PRACTICE_DISTRIBUTION,
+  countryAnalytics = COUNTRY_ANALYTICS,
+  totalSessionsToday
+}) {
+  const chartData = revenueRetentionSeries && revenueRetentionSeries.length > 0 ? revenueRetentionSeries : REVENUE_RETENTION_SERIES;
+  const practiceData = dailyPracticeDistribution && dailyPracticeDistribution.length > 0 ? dailyPracticeDistribution : DAILY_PRACTICE_DISTRIBUTION;
+  const countryData = countryAnalytics && countryAnalytics.length > 0 ? countryAnalytics : COUNTRY_ANALYTICS;
+
+  const formattedSessionsCount = totalSessionsToday !== undefined && totalSessionsToday !== null
+    ? (totalSessionsToday >= 1000 ? `${(totalSessionsToday / 1000).toFixed(1)}k` : totalSessionsToday.toLocaleString())
+    : '68.4k';
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
       {/* Revenue & MRR Growth Area Chart */}
@@ -42,7 +55,7 @@ export function OverviewCharts() {
         <CardContent>
           <div className="h-56 xs:h-64 sm:h-72 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={REVENUE_RETENTION_SERIES} margin={{ top: 10, right: 5, left: -22, bottom: 0 }}>
+              <AreaChart data={chartData} margin={{ top: 10, right: 5, left: -22, bottom: 0 }}>
                 <defs>
                   <linearGradient id="revenueGrad" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#4F46E5" stopOpacity={0.4} />
@@ -86,7 +99,7 @@ export function OverviewCharts() {
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
-                  data={DAILY_PRACTICE_DISTRIBUTION}
+                  data={practiceData}
                   cx="50%"
                   cy="50%"
                   innerRadius={50}
@@ -94,7 +107,7 @@ export function OverviewCharts() {
                   paddingAngle={4}
                   dataKey="percentage"
                 >
-                  {DAILY_PRACTICE_DISTRIBUTION.map((entry, index) => (
+                  {practiceData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.fill} stroke="none" />
                   ))}
                 </Pie>
@@ -111,14 +124,14 @@ export function OverviewCharts() {
               </PieChart>
             </ResponsiveContainer>
             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-              <span className="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white">68.4k</span>
+              <span className="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white">{formattedSessionsCount}</span>
               <span className="text-[10px] font-semibold text-slate-400">Sessions Today</span>
             </div>
           </div>
 
           {/* Legend list */}
           <div className="mt-3 space-y-2">
-            {DAILY_PRACTICE_DISTRIBUTION.map((item, idx) => (
+            {practiceData.map((item, idx) => (
               <div key={idx} className="flex items-center justify-between text-xs font-semibold">
                 <div className="flex items-center gap-2 min-w-0">
                   <span className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: item.fill }} />
@@ -140,7 +153,7 @@ export function OverviewCharts() {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2.5 sm:gap-3">
-            {COUNTRY_ANALYTICS.map((c, idx) => (
+            {countryData.map((c, idx) => (
               <div key={idx} className="p-3 sm:p-3.5 rounded-xl bg-slate-100/70 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-800 flex items-center gap-3">
                 <span className="text-xl sm:text-2xl shrink-0">{c.flag}</span>
                 <div className="min-w-0">

@@ -35,11 +35,15 @@ export function DashboardPage() {
   }, []);
 
   const stats = dashboardData?.stats || {
-    totalUsers: 148520,
-    userGrowth: 14.8,
-    monthlyRevenue: 348900,
-    mrrGrowth: 18.5,
-    watchSyncActive: 74.3
+    totalUsers: 0,
+    userGrowth: 0,
+    monthlyRevenue: 0,
+    mrrGrowth: 0,
+    meditationMinutesToday: 0,
+    avgMinutesPerUser: 0,
+    retentionRate: 0,
+    avgStreakDays: 0,
+    dailySessions: 0
   };
 
   const liveClasses = dashboardData?.liveClasses || [];
@@ -84,21 +88,21 @@ export function DashboardPage() {
       accessor: 'streak',
       cell: (row) => (
         <span className="inline-flex items-center gap-1 text-xs font-extrabold text-amber-500">
-          <Flame className="w-3.5 h-3.5" /> {row.streak} Days
+          <Flame className="w-3.5 h-3.5" /> {row.streak || 0} Days
         </span>
       )
     },
     {
       header: 'HRV Avg',
       accessor: 'hrvAvg',
-      cell: (row) => <span className="font-semibold text-xs text-emerald-500">{row.hrvAvg}</span>
+      cell: (row) => <span className="font-semibold text-xs text-emerald-500">{row.hrvAvg || '65 ms'}</span>
     },
     {
       header: 'Status',
       accessor: 'status',
       cell: (row) => (
         <Badge variant={row.status === 'Active' ? 'emerald' : 'rose'} size="sm">
-          {row.status}
+          {row.status || 'Active'}
         </Badge>
       )
     }
@@ -112,8 +116,8 @@ export function DashboardPage() {
       <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5 md:gap-6">
         <StatCard
           title="Total Registered Users"
-          value={stats.totalUsers.toLocaleString()}
-          change={stats.userGrowth}
+          value={(stats.totalUsers || 0).toLocaleString()}
+          change={stats.userGrowth || 0}
           changeType="increase"
           subtitle="Active practice community"
           icon={Users}
@@ -122,28 +126,28 @@ export function DashboardPage() {
 
         <StatCard
           title="Monthly Recurring Revenue"
-          value={`$${stats.monthlyRevenue.toLocaleString()}`}
-          change={stats.mrrGrowth}
+          value={`$${(stats.monthlyRevenue || 0).toLocaleString()}`}
+          change={stats.mrrGrowth || 0}
           changeType="increase"
-          subtitle="ARR: $4.18M"
+          subtitle={`ARR: $${((stats.monthlyRevenue || 0) * 12).toLocaleString()}`}
           icon={DollarSign}
           gradient="cyan"
         />
 
         <StatCard
           title="Meditation Minutes Today"
-          value="894.5k"
-          change={12.8}
+          value={stats.meditationMinutesToday >= 1000 ? `${(stats.meditationMinutesToday / 1000).toFixed(1)}k` : (stats.meditationMinutesToday || 0).toLocaleString()}
+          change={stats.userGrowth || 0}
           changeType="increase"
-          subtitle="Avg 26 mins per user"
+          subtitle={`Avg ${stats.avgMinutesPerUser || 0} mins per user`}
           icon={Brain}
           gradient="emerald"
         />
 
         <StatCard
           title="Daily Active Streak"
-          value="94.2%"
-          change={4.1}
+          value={`${stats.retentionRate || (stats.avgStreakDays ? Math.round(stats.avgStreakDays * 10) : 0)}%`}
+          change={stats.mrrGrowth || 0}
           changeType="increase"
           subtitle="Consistent daily completion"
           icon={Flame}
@@ -152,7 +156,12 @@ export function DashboardPage() {
       </div>
 
       {/* Interactive Charts Section */}
-      <OverviewCharts />
+      <OverviewCharts
+        revenueRetentionSeries={dashboardData?.revenueRetentionSeries}
+        dailyPracticeDistribution={dashboardData?.dailyPracticeDistribution}
+        countryAnalytics={dashboardData?.countryAnalytics}
+        totalSessionsToday={stats.dailySessions}
+      />
 
 
 

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '../components/common/Card';
 import { Badge } from '../components/common/Badge';
 import { Button } from '../components/common/Button';
@@ -8,6 +8,22 @@ import { HeartPulse, Watch, RefreshCw, CheckCircle2, ShieldCheck, Activity } fro
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 
 export function HealthIntegrationPage() {
+  const [devices, setDevices] = useState(SMARTWATCH_USAGE_STATS);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const fetchHealthStats = async () => {
+    setIsLoading(true);
+    const res = await api.getHealthStats();
+    if (res && res.devices && res.devices.length > 0) {
+      setDevices(res.devices);
+    }
+    setIsLoading(false);
+  };
+
+  useEffect(() => {
+    fetchHealthStats();
+  }, []);
+
   const hrvData = [
     { time: '08:00', hrv: 62, heartRate: 72 },
     { time: '10:00', hrv: 58, heartRate: 78 },
@@ -31,8 +47,8 @@ export function HealthIntegrationPage() {
         </div>
 
         <div className="flex items-center gap-3 w-full sm:w-auto">
-          <Button variant="primary" icon={RefreshCw} className="w-full sm:w-auto">
-            Force Telemetry Resync
+          <Button variant="primary" icon={RefreshCw} onClick={fetchHealthStats} disabled={isLoading} className="w-full sm:w-auto">
+            {isLoading ? 'Syncing...' : 'Force Telemetry Resync'}
           </Button>
         </div>
       </div>
@@ -77,13 +93,13 @@ export function HealthIntegrationPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            {SMARTWATCH_USAGE_STATS.map((dev, i) => (
+            {devices.map((dev, i) => (
               <div key={i} className="p-3 rounded-xl bg-slate-100/70 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-800 flex items-center justify-between">
                 <div className="flex items-center gap-2.5">
                   <Watch className="w-4 h-4 text-indigo-500" />
                   <div>
                     <p className="text-xs font-bold text-slate-800 dark:text-slate-200">{dev.device}</p>
-                    <p className="text-[10px] text-slate-400">{dev.users.toLocaleString()} devices paired</p>
+                    <p className="text-[10px] text-slate-400">{(dev.users || 0).toLocaleString()} devices paired</p>
                   </div>
                 </div>
                 <Badge variant="emerald" size="sm">Connected</Badge>
